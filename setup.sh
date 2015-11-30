@@ -69,42 +69,33 @@ echo
 # https://www.strongswan.org/docs/LinuxKongress2009-strongswan.pdf
 # https://wiki.strongswan.org/projects/strongswan/wiki/ForwardingAndSplitTunneling
 # https://www.zeitgeist.se/2013/11/26/mtu-woes-in-ipsec-tunnels-how-to-fix/
-# http://www.lammertbies.nl/comm/info/iptables.html
+
+iptables -P INPUT   ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT  ACCEPT
 
 iptables -F
 iptables -t nat -F
 iptables -t mangle -F
 
-# GENERAL INPUT
+# INPUT
 
-# reject bogus packets
-iptables -A INPUT -p tcp -m tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
-iptables -A INPUT -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j DROP
-iptables -A INPUT -s 169.254.0.0/16 -j DROP
-iptables -A INPUT -s 172.16.0.0/12 -j DROP
-iptables -A INPUT -s 192.0.2.0/24 -j DROP
-iptables -A INPUT -s 192.168.0.0/16 -j DROP
-iptables -A INPUT -s 10.0.0.0/8 -j DROP
-iptables -A INPUT -s 127.0.0.0/8 ! -i lo -j DROP
+# accept anything already accepted
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
-# accept anything on loopback interface
+# accept anything on the loopback interface
 iptables -A INPUT -i lo -j ACCEPT
 
-# accept anything already accepted as OK
-iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+# drop invalid packets
+iptables -A INPUT -m state --state INVALID -j DROP
+
+# rate-limit repeated new requests from same IP to any ports
+iptables -I INPUT -p tcp -i eth0 -m state --state NEW -m recent --set
+iptables -I INPUT -p tcp -i eth0 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j DROP
 
 # accept (non-standard) SSH
 iptables -A INPUT -p tcp --dport $SSHPORT -j ACCEPT
 
-# temporarily ban addresses that attempt to connect to unserviced ports
-iptables -A INPUT -m recent --name psc --update --seconds 30 -j DROP
-iptables -A INPUT -m tcp -p tcp --dport 3306 -m recent --name psc --set -j DROP
-iptables -A INPUT -m tcp -p tcp --dport 80   -m recent --name psc --set -j DROP
-iptables -A INPUT -m tcp -p tcp --dport 443  -m recent --name psc --set -j DROP
-
-if [ $SSHPORT -ne 22 ]; then
-iptables -A INPUT -m tcp -p tcp --dport 22   -m recent --name psc --set -j DROP
-fi
 
 # VPN
 
@@ -112,25 +103,23 @@ fi
 iptables -A INPUT -p udp --dport  500 -j ACCEPT
 iptables -A INPUT -p udp --dport 4500 -j ACCEPT
 
-# accept incoming traffic from VPN (insert this rule ahead of the bogus packet rules defined earlier)
-iptables -I INPUT --match policy --pol ipsec --dir in --proto esp -s $VPNIPPOOL -j ACCEPT
-
 # forward VPN traffic anywhere
 iptables -A FORWARD --match policy --pol ipsec --dir in  --proto esp -s $VPNIPPOOL -j ACCEPT
 iptables -A FORWARD --match policy --pol ipsec --dir out --proto esp -d $VPNIPPOOL -j ACCEPT
 
-# reduce MTU/MSS values for dumb VPN clients:
+# reduce MTU/MSS values for dumb VPN clients
 iptables -t mangle -A FORWARD --match policy --pol ipsec --dir in -s $VPNIPPOOL -o eth0 -p tcp -m tcp --tcp-flags SYN,RST SYN -m tcpmss --mss 1361:1536 -j TCPMSS --set-mss 1360
 
 # masquerade VPN traffic over eth0
-iptables -t nat -A POSTROUTING -s $VPNIPPOOL -o eth0 -m policy --pol ipsec --dir out -j ACCEPT
+iptables -t nat -A POSTROUTING -s $VPNIPPOOL -o eth0 -m policy --pol ipsec --dir out -j ACCEPT  # exempt IPsec traffic from masquerading
 iptables -t nat -A POSTROUTING -s $VPNIPPOOL -o eth0 -j MASQUERADE
 
-# POLICIES
 
-iptables -P INPUT   DROP
-iptables -P FORWARD DROP
-iptables -P OUTPUT  ACCEPT
+# fall through to drop any other input and forward traffic
+
+iptables -A INPUT   -j DROP
+iptables -A FORWARD -j DROP
+
 
 iptables -L
 /etc/init.d/iptables-persistent save
@@ -159,12 +148,16 @@ echo
 echo "=== Configuring VPN ==="
 echo
 
+# ip_forward is for VPN
+# ip_no_pmtu_disc is for UDP fragmentation
+# others are for security
 
 echo '
-net.ipv4.conf.all.accept_redirects = 0
-net.ipv4.conf.all.send_redirects = 0
 net.ipv4.ip_forward = 1
 net.ipv4.ip_no_pmtu_disc = 1
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
 ' >> /etc/sysctl.conf
 
 sysctl -p
