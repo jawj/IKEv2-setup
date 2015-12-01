@@ -22,6 +22,12 @@ The script assumes you're using a free certificate from [StartSSL](http://www.st
     -keyout ikev2_example_com.key \
     -subj "/C=GB/ST=/L=Brighton/O=Joe Bloggs/CN=ikev2.example.com"
 
+## Why?
+
+We use a similar setup as a corporate VPN at [PSYT](http://psyt.co.uk).
+
+And I use this to bounce my personal web browsing via Germany, to give Theresa May's [Investigatory Powers Bill](https://www.openrightsgroup.org/blog/2015/investigatory-powers-bill-published-and-now-the-fight-is-on) the finger.
+
 ## Why IKEv2?
 
 * Fair security
