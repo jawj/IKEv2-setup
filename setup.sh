@@ -90,8 +90,8 @@ iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m state --state INVALID -j DROP
 
 # rate-limit repeated new requests from same IP to any ports
-iptables -I INPUT -p tcp -i eth0 -m state --state NEW -m recent --set
-iptables -I INPUT -p tcp -i eth0 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j DROP
+iptables -I INPUT -i eth0 -m state --state NEW -m recent --set
+iptables -I INPUT -i eth0 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j DROP
 
 # accept (non-standard) SSH
 iptables -A INPUT -p tcp --dport $SSHPORT -j ACCEPT
