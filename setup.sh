@@ -32,15 +32,6 @@ echo
 echo "Please try again"
 done
 
-VPNKEYFILE="vpn_private.key"
-VPNCRTFILE="vpn_public.crt"
-
-echo "Delete this message (Ctrl-K), paste in the StartSSL PRIVATE KEY, then save and exit (Ctrl-O, Ctrl-X)" > "/tmp/${VPNKEYFILE}"
-nano "/tmp/${VPNKEYFILE}"
-
-echo "Delete this message (Ctrl-K), paste in the StartSSL CERTIFICATE, then save and exit (Ctrl-O, Ctrl-X)" > "/tmp/${VPNCRTFILE}"
-nano "/tmp/${VPNCRTFILE}"
-
 VPNIPPOOL="10.10.10.0/24"
 
 
@@ -50,12 +41,12 @@ echo "=== Updating and installing software ==="
 echo
 
 export DEBIAN_FRONTEND=noninteractive
-aptitude update && aptitude safe-upgrade -y
+apt-get update && apt-get upgrade -y
 
 debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
 
-aptitude install -y strongswan strongswan-plugin-eap-mschapv2 moreutils iptables-persistent postfix mailutils unattended-upgrades
+apt-get install -y strongswan strongswan-plugin-eap-mschapv2 moreutils iptables-persistent postfix mailutils unattended-upgrades certbot
 
 IP=$(ifdata -pa eth0)
 
@@ -130,18 +121,15 @@ echo
 echo "=== Configuring RSA certificates ==="
 echo
 
-VPNKEYPATH="/etc/ipsec.d/private/${VPNKEYFILE}"
-mv "/tmp/${VPNKEYFILE}" "${VPNKEYPATH}"
-chmod 600 "${VPNKEYPATH}"
+echo "/sbin/iptables -I INPUT -p tcp --dport 443 -j ACCEPT" > /root/open-port-443
+echo "/sbin/iptables -D INPUT -p tcp --dport 443 -j ACCEPT" > /root/close-port-443
+chmod +x /root/open-port-443 /root/close-port-443
 
-VPNCRTPATH="/etc/ipsec.d/certs/${VPNCRTFILE}"
-mv "/tmp/${VPNCRTFILE}" "${VPNCRTPATH}"
-chmod 640 "${VPNCRTPATH}"
+certbot certonly --non-interactive --agree-tos --email $EMAIL --standalone --pre-hook /root/open-port-443 --post-hook /root/close-port-443 -d $VPNHOST
 
-INTCRTPATH="/etc/ipsec.d/cacerts/sub.class1.server.ca.pem"
-curl "https://www.startssl.com/certs/sub.class1.server.ca.pem" > "${INTCRTPATH}"
-chmod 640 "${INTCRTPATH}"
-
+ln -s /etc/letsencrypt/live/$VPNHOST/cert.pem    /etc/ipsec.d/certs/cert.pem
+ln -s /etc/letsencrypt/live/$VPNHOST/privkey.pem /etc/ipsec.d/private/privkey.pem
+ln -s /etc/letsencrypt/live/$VPNHOST/chain.pem   /etc/ipsec.d/cacerts/chain.pem
 
 
 echo
@@ -181,7 +169,7 @@ conn roadwarrior
   rekey=no
   left=%any
   leftid=@${VPNHOST}
-  leftcert=${VPNCRTFILE}
+  leftcert=cert.pem
   leftsendcert=always
   leftsubnet=0.0.0.0/0
   right=%any
@@ -193,7 +181,7 @@ conn roadwarrior
   rightsendcert=never
 " > /etc/ipsec.conf
 
-echo "${VPNHOST} : RSA \"${VPNKEYFILE}\"
+echo "${VPNHOST} : RSA \"privkey.pem\"
 ${VPNUSERNAME} %any : EAP \""${VPNPASSWORD}"\"
 " > /etc/ipsec.secrets
 
