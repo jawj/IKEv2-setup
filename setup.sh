@@ -241,11 +241,8 @@ echo
 echo "=== Timezone, mail, unattended upgrades ==="
 echo
 
-echo "${TZONE}" > /etc/timezone
-
-locale-gen en_GB.UTF-8
+timedatectl set-timezone $TZONE
 /usr/sbin/update-locale LANG=en_GB.UTF-8
-dpkg-reconfigure -f noninteractive tzdata
 
 
 sed -r \
