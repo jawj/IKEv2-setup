@@ -2,12 +2,12 @@
 
 ## What?
 
-A script to take Ubuntu Server 14.04 from clean install to production-ready IKEv2 VPN with strongSwan. The server is appropriately firewalled and configured for unattended upgrades.
+A script to take Ubuntu Server 16.10 from clean install to production-ready IKEv2 VPN with strongSwan. The server is appropriately firewalled and configured for unattended upgrades.
 
-* VPN server identifies itself with a (free) StartSSL web server certificate
+* VPN server identifies itself with a Let's Encrypt certificate
 * VPN users authenticate with username and password (EAP-MSCHAPv2)
 
-VPN configuration is tested working with OS X 10.11.1, Windows 10, iOS 9.1, and the Android strongSwan client.
+VPN configuration is tested working with OS X 10.12.1, Windows 10, iOS 10.1, and the Android strongSwan client.
 
 Comments and pull requests welcomed.
 
@@ -15,16 +15,9 @@ Comments and pull requests welcomed.
 
 Run `./setup.sh` as root and you'll be prompted to enter all the necessary details. You *must* use a strong password for the login user, or your server will be compromised. 
 
-The script assumes you're using a free certificate from [StartSSL](http://www.startssl.com/). You can either have StartSSL create your private key, or you can do the right thing and create your own key and certificate signing request like so:
-
-    openssl req -new -newkey rsa:2048 -nodes \
-    -out ikev2_example_com.csr \
-    -keyout ikev2_example_com.key \
-    -subj "/C=GB/ST=/L=Brighton/O=Joe Bloggs/CN=ikev2.example.com"
-
 ## Why?
 
-We use a similar setup as a corporate VPN at [PSYT](http://psyt.co.uk). And I use this to bounce my personal web browsing via Germany, to give Theresa May's [Investigatory Powers Bill](https://www.openrightsgroup.org/blog/2015/investigatory-powers-bill-published-and-now-the-fight-is-on) the finger.
+We use a similar setup as a corporate VPN at [PSYT](http://psyt.co.uk). And I use this to bounce my personal web browsing via Europe, in the hope of giving Theresa May's [Investigatory Powers Bill](https://www.openrightsgroup.org/blog/2015/investigatory-powers-bill-published-and-now-the-fight-is-on) the finger.
 
 ### Why IKEv2?
 
