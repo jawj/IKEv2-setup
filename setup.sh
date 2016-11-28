@@ -1,25 +1,26 @@
-#!/bin/bash
+#!/bin/bash -e
 
 echo
 echo "=== Requesting configuration data ==="
 echo
 
 read -p "Timezone (e.g. Europe/London): " TZONE
-read -p "Email for sysadmin: " EMAIL
-read -p "Port for SSH: " SSHPORT
+read -p "Email address for sysadmin (e.g. j.bloggs@example.com): " EMAIL
+read -p "Port for SSH login (e.g. 22): " SSHPORT
 echo
 
 read -p "Login username: " LOGINUSERNAME
 while true; do
-  read -s -p "Login password: " LOGINPASSWORD
+  read -s -p "Login password (must be STRONG!): " LOGINPASSWORD
   echo
   read -s -p "Confirm login password: " LOGINPASSWORD2
   echo
   [ "$LOGINPASSWORD" = "$LOGINPASSWORD2" ] && break
-  echo "Please try again"
+  echo "Passwords didn't match -- please try again"
 done
 echo
 
+echo "Hostname for VPN must already resolve to this machine to enable letsencrypt"
 read -p "Hostname for VPN (e.g. ikev2.example.com): " VPNHOST
 
 read -p "VPN username: " VPNUSERNAME
@@ -29,11 +30,10 @@ echo
 read -s -p "Confirm VPN password: " VPNPASSWORD2
 echo
 [ "$VPNPASSWORD" = "$VPNPASSWORD2" ] && break
-echo "Please try again"
+echo "Passwords didn't match -- please try again"
 done
 
 VPNIPPOOL="10.10.10.0/24"
-
 
 
 echo
@@ -46,7 +46,7 @@ apt-get update && apt-get upgrade -y
 debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
 
-apt-get install -y strongswan strongswan-plugin-eap-mschapv2 moreutils iptables-persistent postfix mailutils unattended-upgrades certbot
+apt-get install -y language-pack-en strongswan strongswan-plugin-eap-mschapv2 moreutils iptables-persistent postfix mailutils unattended-upgrades certbot
 
 IP=$(ifdata -pa eth0)
 
@@ -111,10 +111,11 @@ iptables -t nat -A POSTROUTING -s $VPNIPPOOL -o eth0 -j MASQUERADE
 iptables -A INPUT   -j DROP
 iptables -A FORWARD -j DROP
 
-
 iptables -L
-/etc/init.d/iptables-persistent save
 
+debconf-set-selections <<< "iptables-persistent iptables-persistent/autosave_v4 boolean true"
+debconf-set-selections <<< "iptables-persistent iptables-persistent/autosave_v6 boolean true"
+dpkg-reconfigure iptables-persistent
 
 
 echo
@@ -130,6 +131,9 @@ certbot certonly --non-interactive --agree-tos --email $EMAIL --standalone --pre
 ln -s /etc/letsencrypt/live/$VPNHOST/cert.pem    /etc/ipsec.d/certs/cert.pem
 ln -s /etc/letsencrypt/live/$VPNHOST/privkey.pem /etc/ipsec.d/private/privkey.pem
 ln -s /etc/letsencrypt/live/$VPNHOST/chain.pem   /etc/ipsec.d/cacerts/chain.pem
+
+echo "/etc/letsencrypt/archive/${VPNHOST}/* r," >> /etc/apparmor.d/local/usr.lib.ipsec.charon
+invoke-rc.d apparmor reload
 
 
 echo
@@ -150,6 +154,9 @@ net.ipv4.conf.all.send_redirects = 0
 
 sysctl -p
 
+# these ike and esp settings are tested on Mac 10.12, iOS 10.1 and Windows 10
+# iOS/Mac with appropriate configuration profiles use (up to) AES_GCM_16_256/PRF_HMAC_SHA2_512/ECP_521 
+# Windows 10 uses AES_CBC_256/HMAC_SHA1_96/PRF_HMAC_SHA1/MODP_1024 -- disabling any of aes256, sha1 or modp1024 causes a connection failure 
 
 echo "config setup
   strictcrlpolicy=yes
@@ -162,8 +169,8 @@ conn roadwarrior
   keyexchange=ikev2
   fragmentation=yes
   forceencaps=yes
-  ike=aes256-sha1-modp1024,3des-sha1-modp1024!
-  esp=aes256-sha1,3des-sha1!
+  ike=aes256gcm16-aes256-sha512-sha384-sha256-sha1-ecp521-ecp384-ecp256-ecp224-ecp192-modp3072-modp2048-modp1536-modp1024!
+  esp=aes256gcm16-aes256-sha512-sha384-sha256-sha1!
   dpdaction=clear
   dpddelay=300s
   rekey=no
@@ -254,6 +261,123 @@ APT::Periodic::Unattended-Upgrade "1";
 ' > /etc/apt/apt.conf.d/10periodic
 
 service unattended-upgrades restart
+
+
+echo
+echo "=== Creating Apple .mobileconfig file ==="
+echo
+
+echo "<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE plist PUBLIC '-//Apple//DTD PLIST 1.0//EN' 'http://www.apple.com/DTDs/PropertyList-1.0.dtd'>
+<plist version='1.0'>
+<dict>
+  <key>PayloadContent</key>
+  <array>
+    <dict>
+      <key>IKEv2</key>
+      <dict>
+        <key>AuthenticationMethod</key>
+        <string>None</string>
+        <key>ChildSecurityAssociationParameters</key>
+        <dict>
+          <key>EncryptionAlgorithm</key>
+          <string>AES-256-GCM</string>
+          <key>IntegrityAlgorithm</key>
+          <string>SHA2-384</string>
+          <key>DiffieHellmanGroup</key>
+          <integer>21</integer>
+          <key>LifeTimeInMinutes</key>
+          <integer>1440</integer>
+        </dict>
+        <key>DeadPeerDetectionRate</key>
+        <string>Medium</string>
+        <key>DisableMOBIKE</key>
+        <integer>0</integer>
+        <key>DisableRedirect</key>
+        <integer>0</integer>
+        <key>EnableCertificateRevocationCheck</key>
+        <integer>0</integer>
+        <key>EnablePFS</key>
+        <true/>
+        <key>ExtendedAuthEnabled</key>
+        <true/>
+        <key>IKESecurityAssociationParameters</key>
+        <dict>
+          <key>EncryptionAlgorithm</key>
+          <string>AES-256-GCM</string>
+          <key>IntegrityAlgorithm</key>
+          <string>SHA2-384</string>
+          <key>DiffieHellmanGroup</key>
+          <integer>21</integer>
+          <key>LifeTimeInMinutes</key>
+          <integer>1440</integer>
+        </dict>
+        <key>LocalIdentifier</key>
+        <string>${VPNHOST}</string>
+        <key>OnDemandEnabled</key>
+        <integer>1</integer>
+        <key>OnDemandRules</key>
+        <array>
+          <dict>
+            <key>Action</key>
+            <string>Connect</string>
+          </dict>
+        </array>
+        <key>RemoteAddress</key>
+        <string>${VPNHOST}</string>
+        <key>RemoteIdentifier</key>
+        <string>${VPNHOST}</string>
+        <key>UseConfigurationAttributeInternalIPSubnet</key>
+        <integer>0</integer>
+      </dict>
+      <key>IPv4</key>
+      <dict>
+        <key>OverridePrimary</key>
+        <integer>1</integer>
+      </dict>
+      <key>PayloadDescription</key>
+      <string>Configures VPN settings</string>
+      <key>PayloadDisplayName</key>
+      <string>VPN</string>
+      <key>PayloadIdentifier</key>
+      <string>com.apple.vpn.managed.$(uuidgen)</string>
+      <key>PayloadType</key>
+      <string>com.apple.vpn.managed</string>
+      <key>PayloadUUID</key>
+      <string>$(uuidgen)</string>
+      <key>PayloadVersion</key>
+      <integer>1</integer>
+      <key>Proxies</key>
+      <dict>
+        <key>HTTPEnable</key>
+        <integer>0</integer>
+        <key>HTTPSEnable</key>
+        <integer>0</integer>
+      </dict>
+      <key>UserDefinedName</key>
+      <string>IKEv2 VPN</string>
+      <key>VPNType</key>
+      <string>IKEv2</string>
+    </dict>
+  </array>
+  <key>PayloadDisplayName</key>
+  <string>IKEv2 VPN configuration</string>
+  <key>PayloadIdentifier</key>
+  <string>com.mackerron.vpn.$(uuidgen)</string>
+  <key>PayloadRemovalDisallowed</key>
+  <false/>
+  <key>PayloadType</key>
+  <string>Configuration</string>
+  <key>PayloadUUID</key>
+  <string>$(uuidgen)</string>
+  <key>PayloadVersion</key>
+  <integer>1</integer>
+</dict>
+</plist>
+" > vpn.mobileconfig
+
+echo 'Your IKEv2 VPN configuration profile for iOS and macOS is attached. Please double-click to install. You will need your device PIN or password, plus your VPN username and password.
+' | mail -s "VPN configuration profile" -A vpn.mobileconfig $EMAIL
 
 
 # necessary for IKEv2?
