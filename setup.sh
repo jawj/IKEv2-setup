@@ -1,16 +1,14 @@
 #!/bin/bash -e
 
-# update to 16.10 if required:
+# == update to 16.10 if required:
 # nano /etc/update-manager/release-upgrades -> Prompt=normal
 # apt-get update
 # do-release-upgrade
 
-ETH0ORSIMILAR=$(ip route get 8.8.8.8 | awk -- '{printf $5}')
-IP=$(ifdata -pa $ETH0ORSIMILAR)
-
-echo "Network interface: ${ETH0ORSIMILAR}"
-echo "External IP: ${IP}"
-
+# == then run this script
+# wget https://raw.githubusercontent.com/jawj/IKEv2-setup/master/setup.sh
+# chmod u+x setup.sh
+# ./setup.sh
 
 echo
 echo "=== Requesting configuration data ==="
@@ -59,6 +57,13 @@ debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
 
 apt-get install -y language-pack-en strongswan strongswan-plugin-eap-mschapv2 moreutils iptables-persistent postfix mailutils unattended-upgrades certbot
+
+
+ETH0ORSIMILAR=$(ip route get 8.8.8.8 | awk -- '{printf $5}')
+IP=$(ifdata -pa $ETH0ORSIMILAR)
+
+echo "Network interface: ${ETH0ORSIMILAR}"
+echo "External IP: ${IP}"
 
 
 echo
