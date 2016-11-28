@@ -1,5 +1,17 @@
 #!/bin/bash -e
 
+# update to 16.10 if required:
+# nano /etc/update-manager/release-upgrades -> Prompt=normal
+# apt-get update
+# do-release-upgrade
+
+ETH0ORSIMILAR=$(ip route get 8.8.8.8 | awk -- '{printf $5}')
+IP=$(ifdata -pa $ETH0ORSIMILAR)
+
+echo "Network interface: ${ETH0ORSIMILAR}"
+echo "External IP: ${IP}"
+
+
 echo
 echo "=== Requesting configuration data ==="
 echo
@@ -20,12 +32,12 @@ while true; do
 done
 echo
 
-echo "Hostname for VPN must already resolve to this machine to enable letsencrypt"
-read -p "Hostname for VPN (e.g. ikev2.example.com): " VPNHOST
+echo "** Hostname for VPN must ALREADY resolve to this machine, to enable Let's Encrypt certificate setup** "
+read -p "Hostname for VPN (e.g. vpn.example.com): " VPNHOST
 
 read -p "VPN username: " VPNUSERNAME
 while true; do
-read -s -p "VPN password: " VPNPASSWORD
+read -s -p "VPN password (no quotes, please): " VPNPASSWORD
 echo
 read -s -p "Confirm VPN password: " VPNPASSWORD2
 echo
@@ -47,9 +59,6 @@ debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
 
 apt-get install -y language-pack-en strongswan strongswan-plugin-eap-mschapv2 moreutils iptables-persistent postfix mailutils unattended-upgrades certbot
-
-IP=$(ifdata -pa eth0)
-
 
 
 echo
@@ -81,8 +90,8 @@ iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m state --state INVALID -j DROP
 
 # rate-limit repeated new requests from same IP to any ports
-iptables -I INPUT -i eth0 -m state --state NEW -m recent --set
-iptables -I INPUT -i eth0 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j DROP
+iptables -I INPUT -i $ETH0ORSIMILAR -m state --state NEW -m recent --set
+iptables -I INPUT -i $ETH0ORSIMILAR -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j DROP
 
 # accept (non-standard) SSH
 iptables -A INPUT -p tcp --dport $SSHPORT -j ACCEPT
@@ -99,11 +108,11 @@ iptables -A FORWARD --match policy --pol ipsec --dir in  --proto esp -s $VPNIPPO
 iptables -A FORWARD --match policy --pol ipsec --dir out --proto esp -d $VPNIPPOOL -j ACCEPT
 
 # reduce MTU/MSS values for dumb VPN clients
-iptables -t mangle -A FORWARD --match policy --pol ipsec --dir in -s $VPNIPPOOL -o eth0 -p tcp -m tcp --tcp-flags SYN,RST SYN -m tcpmss --mss 1361:1536 -j TCPMSS --set-mss 1360
+iptables -t mangle -A FORWARD --match policy --pol ipsec --dir in -s $VPNIPPOOL -o $ETH0ORSIMILAR -p tcp -m tcp --tcp-flags SYN,RST SYN -m tcpmss --mss 1361:1536 -j TCPMSS --set-mss 1360
 
-# masquerade VPN traffic over eth0
-iptables -t nat -A POSTROUTING -s $VPNIPPOOL -o eth0 -m policy --pol ipsec --dir out -j ACCEPT  # exempt IPsec traffic from masquerading
-iptables -t nat -A POSTROUTING -s $VPNIPPOOL -o eth0 -j MASQUERADE
+# masquerade VPN traffic over eth0 etc.
+iptables -t nat -A POSTROUTING -s $VPNIPPOOL -o $ETH0ORSIMILAR -m policy --pol ipsec --dir out -j ACCEPT  # exempt IPsec traffic from masquerading
+iptables -t nat -A POSTROUTING -s $VPNIPPOOL -o $ETH0ORSIMILAR -j MASQUERADE
 
 
 # fall through to drop any other input and forward traffic
@@ -243,7 +252,6 @@ ${LOGINUSERNAME}: ${EMAIL}
 " >> /etc/aliases
 
 newaliases
-
 service postfix restart
 
 
