@@ -25,4 +25,4 @@ We use a similar setup as a corporate VPN at [PSYT](http://psyt.co.uk). And I us
 * Built-in clients for latest iOS, Mac and Windows
 * Robust to connection switching and interruptions via MOBIKE
 
-More at e.g. https://www.bestvpn.com/blog/4147/pptp-vs-l2tp-vs-openvpn-vs-sstp-vs-ikev2/
+More at https://www.cl.cam.ac.uk/~mas90/resources/strongswan/ and https://www.bestvpn.com/blog/4147/pptp-vs-l2tp-vs-openvpn-vs-sstp-vs-ikev2/
