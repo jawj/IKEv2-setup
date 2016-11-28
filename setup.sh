@@ -62,6 +62,7 @@ apt-get install -y language-pack-en strongswan strongswan-plugin-eap-mschapv2 mo
 ETH0ORSIMILAR=$(ip route get 8.8.8.8 | awk -- '{printf $5}')
 IP=$(ifdata -pa $ETH0ORSIMILAR)
 
+echo
 echo "Network interface: ${ETH0ORSIMILAR}"
 echo "External IP: ${IP}"
 
