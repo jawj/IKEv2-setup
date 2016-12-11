@@ -152,7 +152,7 @@ ln -s /etc/letsencrypt/live/$VPNHOST/privkey.pem /etc/ipsec.d/private/privkey.pe
 ln -s /etc/letsencrypt/live/$VPNHOST/chain.pem   /etc/ipsec.d/cacerts/chain.pem
 
 echo "/etc/letsencrypt/archive/${VPNHOST}/* r," >> /etc/apparmor.d/local/usr.lib.ipsec.charon
-invoke-rc.d apparmor reload
+aa-status --enabled && invoke-rc.d apparmor reload
 
 
 echo
