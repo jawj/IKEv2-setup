@@ -137,11 +137,13 @@ echo
 echo "=== Configuring RSA certificates ==="
 echo
 
+mkdir -p /etc/letsencrypt
+
 echo 'rsa-key-size = 4096
 pre-hook = /sbin/iptables -I INPUT -p tcp --dport 443 -j ACCEPT
 post-hook = /sbin/iptables -D INPUT -p tcp --dport 443 -j ACCEPT
 renew-hook = /usr/sbin/ipsec reload && /usr/sbin/ipsec secrets
-' >> /etc/letsencrypt/cli.ini
+' > /etc/letsencrypt/cli.ini
 
 certbot certonly --non-interactive --agree-tos --email $EMAIL --standalone -d $VPNHOST
 
