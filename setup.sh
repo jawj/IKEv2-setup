@@ -137,11 +137,13 @@ echo
 echo "=== Configuring RSA certificates ==="
 echo
 
+mkdir -p /etc/letsencrypt
+
 echo 'rsa-key-size = 4096
 pre-hook = /sbin/iptables -I INPUT -p tcp --dport 443 -j ACCEPT
 post-hook = /sbin/iptables -D INPUT -p tcp --dport 443 -j ACCEPT
 renew-hook = /usr/sbin/ipsec reload && /usr/sbin/ipsec secrets
-' >> /etc/letsencrypt/cli.ini
+' > /etc/letsencrypt/cli.ini
 
 certbot certonly --non-interactive --agree-tos --email $EMAIL --standalone -d $VPNHOST
 
@@ -150,7 +152,7 @@ ln -s /etc/letsencrypt/live/$VPNHOST/privkey.pem /etc/ipsec.d/private/privkey.pe
 ln -s /etc/letsencrypt/live/$VPNHOST/chain.pem   /etc/ipsec.d/cacerts/chain.pem
 
 echo "/etc/letsencrypt/archive/${VPNHOST}/* r," >> /etc/apparmor.d/local/usr.lib.ipsec.charon
-invoke-rc.d apparmor reload
+aa-status --enabled && invoke-rc.d apparmor reload
 
 
 echo
@@ -261,10 +263,11 @@ service postfix restart
 
 
 sed -r \
--e 's|^//\s*"\$\{distro_id\}:\$\{distro_codename\}-updates";$|        "${distro_id}:${distro_codename}-updates";|' \
+-e 's|^//\s*"\$\{distro_id\}:\$\{distro_codename\}-updates";$|//        "${distro_id}:${distro_codename}-updates";|' \
 -e 's|^//Unattended-Upgrade::MinimalSteps "true";$|Unattended-Upgrade::MinimalSteps "true";|' \
 -e 's|^//Unattended-Upgrade::Mail "root";$|Unattended-Upgrade::Mail "root";|' \
 -e 's|^//Unattended-Upgrade::Automatic-Reboot "false";$|Unattended-Upgrade::Automatic-Reboot "true";|' \
+-e 's|^//Unattended-Upgrade::Automatic-Reboot-Time "02:00";$|Unattended-Upgrade::Automatic-Reboot-Time "03:00";|' \
 -i /etc/apt/apt.conf.d/50unattended-upgrades
 
 echo 'APT::Periodic::Update-Package-Lists "1";
