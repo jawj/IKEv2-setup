@@ -14,9 +14,14 @@ echo
 echo "=== Requesting configuration data ==="
 echo
 
-read -p "Timezone (e.g. Europe/London): " TZONE
+read -p "Timezone (default: Europe/London): " TZONE
+TZONE=${TZONE:-'Europe/London'}
+
 read -p "Email address for sysadmin (e.g. j.bloggs@example.com): " EMAIL
-read -p "Port for SSH login (e.g. 22): " SSHPORT
+
+read -p "Port for SSH login (default: 22): " SSHPORT
+SSHPORT=${SSHPORT:-22}
+
 echo
 
 read -p "Login username: " LOGINUSERNAME
