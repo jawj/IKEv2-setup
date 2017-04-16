@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# == update to 16.10 if required:
+# == update to 17.04 if required:
 # nano /etc/update-manager/release-upgrades -> Prompt=normal
 # apt-get update
 # do-release-upgrade
@@ -304,7 +304,7 @@ echo "<?xml version='1.0' encoding='UTF-8'?>
           <key>EncryptionAlgorithm</key>
           <string>AES-256-GCM</string>
           <key>IntegrityAlgorithm</key>
-          <string>SHA2-384</string>
+          <string>SHA2-256</string>
           <key>DiffieHellmanGroup</key>
           <integer>21</integer>
           <key>LifeTimeInMinutes</key>
@@ -327,7 +327,7 @@ echo "<?xml version='1.0' encoding='UTF-8'?>
           <key>EncryptionAlgorithm</key>
           <string>AES-256-GCM</string>
           <key>IntegrityAlgorithm</key>
-          <string>SHA2-384</string>
+          <string>SHA2-256</string>
           <key>DiffieHellmanGroup</key>
           <integer>21</integer>
           <key>LifeTimeInMinutes</key>
