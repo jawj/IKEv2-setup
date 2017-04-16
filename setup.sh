@@ -401,6 +401,7 @@ echo "<?xml version='1.0' encoding='UTF-8'?>
 echo 'Your IKEv2 VPN configuration profile for iOS and macOS is attached. Please double-click to install. You will need your device PIN or password, plus your VPN username and password.
 ' | mail -s "VPN configuration profile" -A vpn.mobileconfig $EMAIL
 
+ifdown $ETH0ORSIMILAR && ifup $ETH0ORSIMILAR
 
 # necessary for IKEv2?
 # Windows: https://support.microsoft.com/en-us/kb/926179
