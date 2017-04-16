@@ -269,7 +269,6 @@ service postfix restart
 
 
 sed -r \
--e 's|^//\s*"\$\{distro_id\}:\$\{distro_codename\}-updates";$|//        "${distro_id}:${distro_codename}-updates";|' \
 -e 's|^//Unattended-Upgrade::MinimalSteps "true";$|Unattended-Upgrade::MinimalSteps "true";|' \
 -e 's|^//Unattended-Upgrade::Mail "root";$|Unattended-Upgrade::Mail "root";|' \
 -e 's|^//Unattended-Upgrade::Automatic-Reboot "false";$|Unattended-Upgrade::Automatic-Reboot "true";|' \
