@@ -35,7 +35,7 @@ while true; do
 done
 echo
 
-echo "** Hostname for VPN must ALREADY resolve to this machine, to enable Let's Encrypt certificate setup** "
+echo "** Hostname for VPN must ALREADY resolve to this machine, to enable Let's Encrypt certificate setup **"
 read -p "Hostname for VPN (e.g. vpn.example.com): " VPNHOST
 
 read -p "VPN username: " VPNUSERNAME
