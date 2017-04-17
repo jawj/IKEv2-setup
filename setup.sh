@@ -182,9 +182,9 @@ net.ipv6.conf.lo.disable_ipv6 = 1
 
 sysctl -p
 
-# these ike and esp settings are tested on Mac 10.12, iOS 10.1 and Windows 10
-# iOS/Mac with appropriate configuration profiles use (up to) AES_GCM_16_256/PRF_HMAC_SHA2_512/ECP_521 
-# Windows 10 uses AES_CBC_256/HMAC_SHA1_96/PRF_HMAC_SHA1/MODP_1024 -- disabling any of aes256, sha1 or modp1024 causes a connection failure 
+# these ike and esp settings are tested on Mac 10.12, iOS 10 and Windows 10
+# iOS/Mac with appropriate configuration profiles use AES_GCM_16_256/PRF_HMAC_SHA2_256/ECP_521 
+# Windows 10 uses AES_CBC_256/HMAC_SHA2_256_128/PRF_HMAC_SHA2_256/MODP_1024 
 
 echo "config setup
   strictcrlpolicy=yes
@@ -197,8 +197,8 @@ conn roadwarrior
   keyexchange=ikev2
   fragmentation=yes
   forceencaps=yes
-  ike=aes256gcm16-aes256-sha512-sha384-sha256-sha1-ecp521-ecp384-ecp256-ecp224-ecp192-modp3072-modp2048-modp1536-modp1024!
-  esp=aes256gcm16-aes256-sha512-sha384-sha256-sha1!
+  ike=aes256gcm16-sha256-ecp521,aes256-sha256-modp1024!
+  esp=aes256gcm16-sha256,aes256-sha1!
   dpdaction=clear
   dpddelay=180s
   rekey=no
