@@ -2,9 +2,9 @@
 
 ## What?
 
-A script to take Ubuntu Server 16.10 from clean install to production-ready IKEv2 VPN with strongSwan. The server is appropriately firewalled and configured for unattended upgrades.
+A script to take Ubuntu Server 17.04 from clean install to production-ready IKEv2 VPN with strongSwan. The server is appropriately firewalled and configured for unattended security upgrades.
 
-* VPN server identifies itself with a Let's Encrypt certificate (no need to install private certs)
+* VPN server identifies itself with a Let's Encrypt certificate (no need to install private certs), which is automatically renewed
 * VPN users authenticate simply with username and password (EAP-MSCHAPv2)
 * A `.mobileconfig` profile is generated for Mac and iOS, to set up secure ciphers and *Connect on demand* support
 
