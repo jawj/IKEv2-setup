@@ -188,7 +188,7 @@ sysctl -p
 
 echo "config setup
   strictcrlpolicy=yes
-  uniqueids=no
+  uniqueids=never
 
 conn roadwarrior
   auto=add
