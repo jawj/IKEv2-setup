@@ -406,7 +406,7 @@ cat << EOF | mail -s "VPN configuration" -A vpn.mobileconfig $EMAIL
   
 A configuration profile is attached — please tap or double-click to install. 
 
-You will need your device PIN or password, then your VPN username and password.
+You will be asked for your device PIN or password, and your VPN username and password.
 
 
 == Windows 10 ==
