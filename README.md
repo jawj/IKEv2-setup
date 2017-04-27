@@ -18,7 +18,7 @@ Comments and pull requests are welcomed.
 ### Caveats
 
 * The script will **not** work unmodified on 16.04 LTS because the `certbot` package is outdated (and found under the name `letsencrypt`).
-* If you previously set this up on Ubuntu 16.10, you'll need to manually amend the `ike` and `esp` directives in `/etc/ipsec.conf` after the upgrade to 17.04, since the latest version of strongSwan doesn't like different kinds of ciphers smooshed together.
+* If you previously set this up on Ubuntu 16.10, you'll need to manually amend the `ike` and `esp` directives in `/etc/ipsec.conf` after the upgrade to 17.04, since the latest version of strongSwan doesn't like different kinds of ciphers smooshed together. You'll also need to change `uniqueids=no` to `uniqueids=never`.
 * There's no IPv6 support — and, in fact, IPv6 networking is disabled — because I haven't got to grips with the security implications (e.g. `iptables` rules), and because supporting IPv6 prevents the use of `forceencaps`.
 * It's not recommended to use this unmodified on a server you use for anything else, as it does as it sees fit with various wider settings that may conflict with what you're doing.
 
