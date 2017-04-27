@@ -197,8 +197,8 @@ conn roadwarrior
   keyexchange=ikev2
   fragmentation=yes
   forceencaps=yes
-  ike=aes256gcm16-sha256-ecp521,aes256-sha256-modp1024!
-  esp=aes256gcm16-sha256,aes256-sha1!
+  ike=aes256gcm16-sha256-ecp521,aes256-sha256-ecp384!
+  esp=aes256gcm16-sha256!
   dpdaction=clear
   dpddelay=180s
   rekey=no
