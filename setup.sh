@@ -401,29 +401,35 @@ echo "<?xml version='1.0' encoding='UTF-8'?>
 </plist>
 " > vpn.mobileconfig
 
-echo << EOF | mail -s "VPN configuration" -A vpn.mobileconfig $EMAIL
-* iOS and macOS
+cat << EOF | mail -s "VPN configuration" -A vpn.mobileconfig $EMAIL
+== iOS and macOS ==
   
-A configuration profile is attached — please tap or double-click to install. You will need your device PIN or password, then your VPN username and password.
-  
-* Windows 10
+A configuration profile is attached — please tap or double-click to install. 
+
+You will need your device PIN or password, then your VPN username and password.
+
+
+== Windows 10 ==
   
 Run the following commands in PowerShell:
   
-  Add-VpnConnection -Name "${VPNHOST}" `
-    -ServerAddress "${VPNHOST}" `
-    -TunnelType IKEv2 `
-    -EncryptionLevel Maximum `
-    -AuthenticationMethod EAP
+Add-VpnConnection -Name "${VPNHOST}" \`
+  -ServerAddress "${VPNHOST}" \`
+  -TunnelType IKEv2 \`
+  -EncryptionLevel Maximum \`
+  -AuthenticationMethod EAP
 
-  Set-VpnConnectionIPsecConfiguration -ConnectionName "${VPNHOST}" `
-    -AuthenticationTransformConstants GCMAES256 `
-    -CipherTransformConstants GCMAES256 `
-    -EncryptionMethod AES256 `
-    -IntegrityCheckMethod SHA256 `
-    -DHGroup ECP384 `
-    -PfsGroup ECP384
-EOF 
+Set-VpnConnectionIPsecConfiguration -ConnectionName "${VPNHOST}" \`
+  -AuthenticationTransformConstants GCMAES256 \`
+  -CipherTransformConstants GCMAES256 \`
+  -EncryptionMethod AES256 \`
+  -IntegrityCheckMethod SHA256 \`
+  -DHGroup ECP384 \`
+  -PfsGroup ECP384 \`
+  -Force
+
+
+EOF
 
 # necessary for IKEv2?
 # Windows: https://support.microsoft.com/en-us/kb/926179
