@@ -401,7 +401,7 @@ echo "<?xml version='1.0' encoding='UTF-8'?>
 </plist>
 " > vpn.mobileconfig
 
-cat << EOF | mail -s "VPN configuration" -A vpn.mobileconfig $EMAIL
+cat << EOF | mail -r $USER@$VPNHOST -s "VPN configuration" -A vpn.mobileconfig $EMAIL
 == iOS and macOS ==
   
 A configuration profile is attached — please tap or double-click to install. 
