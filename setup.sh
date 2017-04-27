@@ -380,13 +380,13 @@ echo "<?xml version='1.0' encoding='UTF-8'?>
         <integer>0</integer>
       </dict>
       <key>UserDefinedName</key>
-      <string>IKEv2 VPN</string>
+      <string>${VPNHOST}</string>
       <key>VPNType</key>
       <string>IKEv2</string>
     </dict>
   </array>
   <key>PayloadDisplayName</key>
-  <string>IKEv2 VPN configuration</string>
+  <string>IKEv2 VPN configuration (${VPNHOST})</string>
   <key>PayloadIdentifier</key>
   <string>com.mackerron.vpn.$(uuidgen)</string>
   <key>PayloadRemovalDisallowed</key>
@@ -401,8 +401,29 @@ echo "<?xml version='1.0' encoding='UTF-8'?>
 </plist>
 " > vpn.mobileconfig
 
-echo 'Your IKEv2 VPN configuration profile for iOS and macOS is attached. Please double-click to install. You will need your device PIN or password, plus your VPN username and password.
-' | mail -s "VPN configuration profile" -A vpn.mobileconfig $EMAIL
+echo << EOF | mail -s "VPN configuration" -A vpn.mobileconfig $EMAIL
+* iOS and macOS
+  
+A configuration profile is attached — please tap or double-click to install. You will need your device PIN or password, then your VPN username and password.
+  
+* Windows 10
+  
+Run the following commands in PowerShell:
+  
+  Add-VpnConnection -Name "${VPNHOST}" `
+    -ServerAddress "${VPNHOST}" `
+    -TunnelType IKEv2 `
+    -EncryptionLevel Maximum `
+    -AuthenticationMethod EAP
+
+  Set-VpnConnectionIPsecConfiguration -ConnectionName "${VPNHOST}" `
+    -AuthenticationTransformConstants GCMAES256 `
+    -CipherTransformConstants GCMAES256 `
+    -EncryptionMethod AES256 `
+    -IntegrityCheckMethod SHA256 `
+    -DHGroup ECP384 `
+    -PfsGroup ECP384
+EOF 
 
 # necessary for IKEv2?
 # Windows: https://support.microsoft.com/en-us/kb/926179
