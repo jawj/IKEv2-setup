@@ -6,7 +6,7 @@ A script to take Ubuntu Server 17.04 from clean install to production-ready IKEv
 
 * The VPN server identifies itself with a Let's Encrypt certificate, so there's no need for clients to install private certificates — they can simply authenticate with username and password (EAP-MSCHAPv2). The Let's Encrypt certificate is set up to auto-renew.
 * The box is firewalled with `iptables` and configured for unattended security upgrades, so it should be safe to forget about until 17.04 reaches end-of-life.
-* A `.mobileconfig` profile is generated for Mac and iOS, to set up moderately secure ciphers and *Connect on demand* support, sending all traffic over the VPN.
+* A `.mobileconfig` profile is generated for Mac and iOS, to set up moderately secure ciphers and *Connect on demand* support, sending all traffic over the VPN. PowerShell commands are provided to configure secure ciphers on Windows 10. These are sent by email.
 
 Comments and pull requests are welcomed.
 
@@ -17,15 +17,18 @@ Comments and pull requests are welcomed.
 
 ### Caveats
 
-* The script will **not** work unmodified on 16.04 LTS because the `certbot` package is outdated (and found under the name `letsencrypt`). 
-* If you previously set this up on Ubuntu 16.10, you'll need to manually amend the `ike` and `esp` directives in `/etc/ipsec.conf` after the upgrade to 17.04, since the latest version of strongSwan doesn't like different kinds of ciphers mushed together.
+* The script will **not** work unmodified on 16.04 LTS because the `certbot` package is outdated (and found under the name `letsencrypt`).
+* If you previously set this up on Ubuntu 16.10, you'll need to manually amend the `ike` and `esp` directives in `/etc/ipsec.conf` after the upgrade to 17.04, since the latest version of strongSwan doesn't like different kinds of ciphers smooshed together.
+* There's no IPv6 support — and, in fact, IPv6 networking is disabled — because I haven't got to grips with the security implications (e.g. `iptables` rules), and because supporting IPv6 prevents the use of `forceencaps`.
 * It's not recommended to use this unmodified on a server you use for anything else, as it does as it sees fit with various wider settings that may conflict with what you're doing.
-* There's no IPv6 support — and, in fact, IPv6 networking is disabled — because I haven't got to grips with the security implications of that.
-
 
 ## How?
 
-Run `./setup.sh` as root and you'll be prompted to enter all the necessary details. You *must* use a strong password for the login user, or your server will be compromised. 
+* Start with a clean Ubuntu 17.04 Server installation.
+
+* Pick a domain name for the VPN server and ensure that it already resolves to the correct IP. Let's Encrypt needs this in order to create the server certificate.
+
+* Run `./setup.sh` as root and you'll be prompted to enter all the necessary details. You *must* use a strong password or passphrase for the login user, or your server *will* be compromised. 
 
 ## Why?
 
