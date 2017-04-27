@@ -18,7 +18,6 @@ Comments and pull requests are welcomed.
 ### Caveats
 
 * The script will **not** work unmodified on 16.04 LTS because the `certbot` package is outdated (and found under the name `letsencrypt`).
-* If you previously set this up on Ubuntu 16.10, you'll need to manually amend the `ike` and `esp` directives in `/etc/ipsec.conf` after the upgrade to 17.04, since the latest version of strongSwan doesn't like different kinds of ciphers smooshed together. You'll also need to change `uniqueids=no` to `uniqueids=never`.
 * There's no IPv6 support — and, in fact, IPv6 networking is disabled — because I haven't got to grips with the security implications (e.g. `iptables` rules), and because supporting IPv6 prevents the use of `forceencaps`.
 * It's not recommended to use this unmodified on a server you use for anything else, as it does as it sees fit with various wider settings that may conflict with what you're doing.
 
@@ -29,6 +28,14 @@ Comments and pull requests are welcomed.
 * Pick a domain name for the VPN server and ensure that it already resolves to the correct IP. Let's Encrypt needs this in order to create the server certificate.
 
 * Run `./setup.sh` as root and you'll be prompted to enter all the necessary details. You *must* use a strong password or passphrase for the login user, or your server *will* be compromised. 
+
+### Upgrades
+
+If you previously set this up on Ubuntu 16.10, you will need to manually amend the `ike`, `esp`, and `uniqueids` directives in `/etc/ipsec.conf` to reflect the current values in `setup.sh` after upgrading to 17.04. The newer version of strongSwan in 17.04 doesn't like different sorts of ciphers being smooshed together, and `uniqueids=no` now gives me problems trying to connect from two different devices with the same user name.
+
+Alternatively, it may be cleaner to make a record of any changes to `ipsec.secrets`, blow the whole thing away and reinstall.
+
+You will also need to recreate any Windows 10 VPNs using the provided PowerShell commands, since the less secure ciphers supported by GUI-created Windows VPNs are no longer enabled.
 
 ## Why?
 
