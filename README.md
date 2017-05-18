@@ -33,7 +33,7 @@ Comments and pull requests are welcomed.
 
 If things don't work out right away ...
 
-* Make sure you created the client connection using the emailed `.mobileconfig` file or PowerShell commands. Setting it up manually via the OS GUI will not work, since it will default to highly inscure ciphers which the server has not been configured to support.
+* Make sure you created the client connection using the emailed `.mobileconfig` file or PowerShell commands. Setting it up manually via the OS GUI will not work, since it will default to insecure ciphers which the server has not been configured to support.
 
 * Check the logs on both client and server. 
 __On the server:__  Log in via SSH, then `sudo less +F /var/log/syslog`, and try to connect. 
