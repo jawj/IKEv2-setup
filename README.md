@@ -29,6 +29,16 @@ Comments and pull requests are welcomed.
 
 * Run `./setup.sh` as root and you'll be prompted to enter all the necessary details. You *must* use a strong password or passphrase for the login user, or your server *will* be compromised. 
 
+### Troubleshooting
+
+If things don't work out right away ...
+
+* Make sure you created the client connection using the emailed `.mobileconfig` file or PowerShell commands. Setting it up manually via the OS GUI will not work, since it will default to highly inscure ciphers which the server has not been configured to support.
+
+* Check the logs on both client and server. 
+__On the server:__  Log in via SSH, then `sudo less +F /var/log/syslog`, and try to connect. 
+__On the client:__  On a Mac, open Console.app in /Applications/Utilities. If connecting from an iPhone, plug the iPhone into the Mac. Pick the relevant device (in the bar down the left), and filter the output (in the box at top right) to `nesession`, and try to connect. On Windows or Linux I don't know where you find the logs (if _you_ know, feel free to write the explanation and send a pull request).
+
 ### Upgrades
 
 If you previously set this up on Ubuntu 16.10, you will need to manually amend the `ike`, `esp`, and `uniqueids` directives in `/etc/ipsec.conf` to reflect the current values in `setup.sh` after upgrading to 17.04. The newer version of strongSwan in 17.04 doesn't like different sorts of ciphers being smooshed together, and `uniqueids=no` now gives me problems trying to connect from two different devices with the same user name.
