@@ -35,9 +35,11 @@ If things don't work out right away ...
 
 * Make sure you created the client connection using the emailed `.mobileconfig` file or PowerShell commands. Setting it up manually via the OS GUI will not work, since it will default to insecure ciphers which the server has not been configured to support.
 
-* Check the logs on both client and server. 
-__On the server:__  Log in via SSH, then `sudo less +F /var/log/syslog`, and try to connect. 
-__On the client:__  On a Mac, open Console.app in /Applications/Utilities. If connecting from an iPhone, plug the iPhone into the Mac. Pick the relevant device (in the bar down the left), and filter the output (in the box at top right) to `nesession`, and try to connect. On Windows or Linux I don't know where you find the logs (if _you_ know, feel free to write the explanation and send a pull request).
+* Check the server logs on strongSwan startup and when you try to connect, and the client logs when you try to connect. 
+
+  * __On the server:__  Log in via SSH, then `sudo less +F /var/log/syslog`. To see startup logs, log in to another session and `sudo ipsec restart` there, then switch back. To see the logs during a connection attempt, try to connect from a client. 
+  
+  * __On the client:__  On a Mac, open Console.app in /Applications/Utilities. If connecting from an iPhone, plug the iPhone into the Mac. Pick the relevant device (in the bar down the left), and filter the output (in the box at top right) to `nesession`, and try to connect. On Windows or Linux I don't know where you find the logs (if _you_ know, feel free to write the explanation and send a pull request).
 
 ### Upgrades
 
@@ -46,6 +48,13 @@ If you previously set this up on Ubuntu 16.10, you will need to manually amend t
 Alternatively, it may be cleaner to make a record of any changes to `ipsec.secrets`, blow the whole thing away and reinstall.
 
 You will also need to recreate any Windows 10 VPNs using the provided PowerShell commands, since the less secure ciphers supported by GUI-created Windows VPNs are no longer enabled.
+
+### Bonus paranoia
+
+Your traffic is not logged on the server, but if you're feeling especially paranoid there are various things you could do to reduce logging further. A simple and particularly drastic option is:
+
+    sudo rm /var/log/syslog && sudo ln -s /dev/null /var/log/syslog
+    sudo rm /var/log/auth.log && sudo ln -s /dev/null /var/log/auth.log
 
 ## Why?
 
