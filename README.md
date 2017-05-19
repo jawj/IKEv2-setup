@@ -12,7 +12,7 @@ Comments and pull requests are welcomed.
 
 ### Compatibility
 
-* The setup script is tested working on the cheapest VPSs offered by Linode and OVH, and on Scaleway's ARM64-2GB (on Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered).
+* The setup script is tested working on the cheapest VPSs offered by Linode, OVH, Vultr, and on Scaleway's ARM64-2GB (on Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered).
 * The VPN configuration is tested working with the built-in VPN clients on OS X 10.12, Windows 10, and iOS 10, and the Android strongSwan client.
 
 ### Caveats
