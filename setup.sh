@@ -152,9 +152,9 @@ renew-hook = /usr/sbin/ipsec reload && /usr/sbin/ipsec secrets
 
 certbot certonly --non-interactive --agree-tos --email $EMAIL --standalone -d $VPNHOST
 
-ln -s /etc/letsencrypt/live/$VPNHOST/cert.pem    /etc/ipsec.d/certs/cert.pem
-ln -s /etc/letsencrypt/live/$VPNHOST/privkey.pem /etc/ipsec.d/private/privkey.pem
-ln -s /etc/letsencrypt/live/$VPNHOST/chain.pem   /etc/ipsec.d/cacerts/chain.pem
+ln -f -s /etc/letsencrypt/live/$VPNHOST/cert.pem    /etc/ipsec.d/certs/cert.pem
+ln -f -s /etc/letsencrypt/live/$VPNHOST/privkey.pem /etc/ipsec.d/private/privkey.pem
+ln -f -s /etc/letsencrypt/live/$VPNHOST/chain.pem   /etc/ipsec.d/cacerts/chain.pem
 
 echo "/etc/letsencrypt/archive/${VPNHOST}/* r," >> /etc/apparmor.d/local/usr.lib.ipsec.charon
 aa-status --enabled && invoke-rc.d apparmor reload
@@ -230,7 +230,7 @@ echo
 
 # user + SSH
 
-adduser --disabled-password --gecos "" $LOGINUSERNAME
+id -u $LOGINUSERNAME &>/dev/null || adduser --disabled-password --gecos "" $LOGINUSERNAME
 echo "${LOGINUSERNAME}:${LOGINPASSWORD}" | chpasswd
 adduser ${LOGINUSERNAME} sudo
 
