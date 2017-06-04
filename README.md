@@ -12,12 +12,12 @@ Comments and pull requests are welcomed.
 
 ### Compatibility
 
-* The setup script is tested working on the cheapest VPSs offered by Linode, OVH, Vultr, and on Scaleway's ARM64-2GB (on Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered).
-* The VPN configuration is tested working with the built-in VPN clients on OS X 10.12, Windows 10, and iOS 10, and the Android strongSwan client.
+* The setup script is tested working on the cheapest VPSs offered by Linode, OVH and Vultr, and on Scaleway's ARM64-2GB (on Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered).
+* The VPN configuration is tested working with the built-in VPN clients on OS X 10.12, iOS 10, Windows 10, the Android strongSwan client, and (unsurprisingly) strongSwan on Linux.
 
 ### Caveats
 
-* The script will **not** work unmodified on 16.04 LTS because the `certbot` package is outdated (and found under the name `letsencrypt`).
+* The script will **not** work as-is on 16.04 LTS because the `certbot` package is outdated (and found under the name `letsencrypt`).
 * There's no IPv6 support — and, in fact, IPv6 networking is disabled — because I haven't got to grips with the security implications (e.g. `iptables` rules), and because supporting IPv6 prevents the use of `forceencaps`.
 * It's not recommended to use this unmodified on a server you use for anything else, as it does as it sees fit with various wider settings that may conflict with what you're doing.
 
@@ -25,9 +25,9 @@ Comments and pull requests are welcomed.
 
 * Start with a clean Ubuntu 17.04 Server installation.
 
-* Pick a domain name for the VPN server and ensure that it already resolves to the correct IP. Let's Encrypt needs this in order to create the server certificate.
+* Pick a domain name for the VPN server and **ensure that it already resolves to the correct IP**. _Let's Encrypt_ needs this in order to create your server certificate.
 
-* Run `./setup.sh` as root and you'll be prompted to enter all the necessary details. You *must* use a strong password or passphrase for the login user, or your server *will* be compromised. 
+* Run `./setup.sh` as root and you'll be prompted to enter all the necessary details. **You *must* use a strong password** or passphrase for the login user, or your server *will* be compromised. 
 
 ### Troubleshooting
 
@@ -37,9 +37,23 @@ If things don't work out right away ...
 
 * Check the server logs on strongSwan startup and when you try to connect, and the client logs when you try to connect. 
 
-  * __On the server:__  Log in via SSH, then `sudo less +F /var/log/syslog`. To see startup logs, log in to another session and `sudo ipsec restart` there, then switch back. To see the logs during a connection attempt, try to connect from a client. 
+  * __On the server:__  Log in via SSH, then `sudo less +F /var/log/syslog`. To see startup logs, log in to another session and `sudo ipsec restart` there, then switch back. To see what's logged during a connection attempt, try to connect from a client. 
   
-  * __On the client:__  On a Mac, open Console.app in /Applications/Utilities. If connecting from an iPhone, plug the iPhone into the Mac. Pick the relevant device (in the bar down the left), and filter the output (in the box at top right) to `nesession`, and try to connect. On Windows or Linux I don't know where you find the logs (if _you_ know, feel free to write the explanation and send a pull request).
+  * __On the client:__  On a Mac, open Console.app in /Applications/Utilities. If connecting from an iPhone, plug the iPhone into the Mac. Pick the relevant device (in the bar down the left), and filter the output (in the box at top right) to `nesession`, and try to connect. (On Windows or Linux I don't know where you find the logs — if _you_ know, feel free to write the explanation and send a pull request).
+  
+### Users
+
+To add or change VPN users, it's:
+
+    sudo nano /etc/ipsec.secrets
+    
+Edit usernames and passwords as you see fit (but don't touch the first line, which specifies the server certificate). The line format for each user is:
+
+    someusername %any : EAP "somepassword"
+
+To exit nano it's `Ctrl + O` then `Ctrl + X`, and to have strongSwan pick up the changes it's:
+
+    sudo ipsec secrets
 
 ### Upgrades
 
