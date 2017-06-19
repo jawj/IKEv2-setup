@@ -433,7 +433,7 @@ EOF
 
 cat << EOF > vpn-ubuntu-client.sh
 #!/bin/bash -e
-if [[ $(id -u) -ne 0 ]]; then echo "Please run as root (e.g. sudo ./path/to/this/script)"; exit 1; fi
+if [[ \$(id -u) -ne 0 ]]; then echo "Please run as root (e.g. sudo ./path/to/this/script)"; exit 1; fi
 
 read -p "VPN username (same as entered on server): " VPNUSERNAME
 while true; do
@@ -478,7 +478,7 @@ grep -Fq 'jawj/IKEv2-setup' /etc/ipsec.secrets || echo "
 ipsec restart
 
 echo "Bringing up VPN ..."
-ipsec up ikev2vpn  # if you didn't set auto=start
+ipsec up ikev2vpn
 ipsec statusall
 
 echo -n "Testing IP address ... "
