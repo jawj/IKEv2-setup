@@ -445,8 +445,8 @@ echo
 echo "Passwords didn't match -- please try again"
 done
 
-apt-get install strongswan libstrongswan-standard-plugins libcharon-extra-plugins
-apt-get install libcharon-standard-plugins || true  # 17.04+ only
+apt-get install -y strongswan libstrongswan-standard-plugins libcharon-extra-plugins
+apt-get install -y libcharon-standard-plugins || true  # 17.04+ only
 
 ln -f -s /etc/ssl/certs/DST_Root_CA_X3.pem /etc/ipsec.d/cacerts/
 
@@ -475,16 +475,17 @@ grep -Fq 'jawj/IKEv2-setup' /etc/ipsec.secrets || echo "
 \${VPNUSERNAME} %any : EAP \"\${VPNPASSWORD}\"
 " >> /etc/ipsec.secrets
 
-ipsec restart
+ipsec reload && ipsec secrets
 
 echo "Bringing up VPN ..."
 ipsec up ikev2vpn
 ipsec statusall
 
+echo
 echo -n "Testing IP address ... "
 VPNIP=\$(dig -4 +short ${VPNHOST})
 ACTUALIP=\$(curl -s ifconfig.co)
-if [[ \$VPNIP = \$ACTUALIP ]]; then echo "PASSED"; else echo "FAILED"; fi
+if [[ "\$VPNIP" = "\$ACTUALIP" ]]; then echo "PASSED (IP: \${VPNIP})"; else echo "FAILED (IP: \${ACTUALIP}, VPN IP: \${VPNIP})"; fi
 
 echo
 echo "To disconnect: ipsec down ikev2vpn"
