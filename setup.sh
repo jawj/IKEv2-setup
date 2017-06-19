@@ -475,7 +475,8 @@ grep -Fq 'jawj/IKEv2-setup' /etc/ipsec.secrets || echo "
 \${VPNUSERNAME} %any : EAP \"\${VPNPASSWORD}\"
 " >> /etc/ipsec.secrets
 
-ipsec reload && ipsec secrets
+ipsec restart
+sleep 5  # is there a better way?
 
 echo "Bringing up VPN ..."
 ipsec up ikev2vpn
