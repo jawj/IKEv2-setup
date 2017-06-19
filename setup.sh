@@ -297,7 +297,7 @@ APT::Periodic::Unattended-Upgrade "1";
 service unattended-upgrades restart
 
 echo
-echo "=== Creating Apple .mobileconfig file ==="
+echo "=== Creating configuration files ==="
 echo
 
 cd /home/${LOGINUSERNAME}
@@ -450,7 +450,7 @@ apt-get install libcharon-standard-plugins || true  # 17.04+ only
 
 ln -f -s /etc/ssl/certs/DST_Root_CA_X3.pem /etc/ipsec.d/cacerts/
 
-grep -Fq 'jawj/IKEv2-setup' /etc/ipsec.conf || echo '
+grep -Fq 'jawj/IKEv2-setup' /etc/ipsec.conf || echo "
 # https://github.com/jawj/IKEv2-setup
 conn ikev2vpn
         ikelifetime=60m
@@ -468,12 +468,12 @@ conn ikev2vpn
         rightid=@${VPNHOST}
         rightsubnet=0.0.0.0/0
         auto=add  # or auto=start to bring up automatically
-' >> /etc/ipsec.conf
+" >> /etc/ipsec.conf
 
-grep -Fq 'jawj/IKEv2-setup' /etc/ipsec.secrets || echo '
+grep -Fq 'jawj/IKEv2-setup' /etc/ipsec.secrets || echo "
 # https://github.com/jawj/IKEv2-setup
-\${VPNUSERNAME} %any : EAP "\${VPNPASSWORD}"
-' >> /etc/ipsec.secrets
+\${VPNUSERNAME} %any : EAP \"\${VPNPASSWORD}\"
+" >> /etc/ipsec.secrets
 
 ipsec restart
 
@@ -482,9 +482,9 @@ ipsec up ikev2vpn  # if you didn't set auto=start
 ipsec statusall
 
 echo -n "Testing IP address ... "
-VPNIP=$(dig -4 +short ${VPNHOST})
-ACTUALIP=$(curl -s ifconfig.co)
-if [[ $VPNIP = $ACTUALIP ]]; then echo "PASSED"; else echo "FAILED"; fi
+VPNIP=\$(dig -4 +short ${VPNHOST})
+ACTUALIP=\$(curl -s ifconfig.co)
+if [[ \$VPNIP = \$ACTUALIP ]]; then echo "PASSED"; else echo "FAILED"; fi
 
 echo
 echo "To disconnect: ipsec down ikev2vpn"
