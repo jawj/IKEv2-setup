@@ -1,11 +1,11 @@
 #!/bin/bash -e
 
-# == update to 17.04 if required:
+# == Update to 17.04 if required:
 # nano /etc/update-manager/release-upgrades -> Prompt=normal
 # apt-get update
 # do-release-upgrade
 
-# == then run this script
+# == Then run this script
 # wget https://raw.githubusercontent.com/jawj/IKEv2-setup/master/setup.sh
 # chmod u+x setup.sh
 # ./setup.sh
@@ -156,7 +156,11 @@ ln -f -s /etc/letsencrypt/live/$VPNHOST/cert.pem    /etc/ipsec.d/certs/cert.pem
 ln -f -s /etc/letsencrypt/live/$VPNHOST/privkey.pem /etc/ipsec.d/private/privkey.pem
 ln -f -s /etc/letsencrypt/live/$VPNHOST/chain.pem   /etc/ipsec.d/cacerts/chain.pem
 
-echo "/etc/letsencrypt/archive/${VPNHOST}/* r," >> /etc/apparmor.d/local/usr.lib.ipsec.charon
+grep -Fq 'jawj/IKEv2-setup' /etc/apparmor.d/local/usr.lib.ipsec.charon || echo "
+# https://github.com/jawj/IKEv2-setup
+/etc/letsencrypt/archive/${VPNHOST}/* r,
+" >> /etc/apparmor.d/local/usr.lib.ipsec.charon
+
 aa-status --enabled && invoke-rc.d apparmor reload
 
 
@@ -168,13 +172,13 @@ echo
 # ip_no_pmtu_disc is for UDP fragmentation
 # others are for security
 
-echo '
+grep -Fq 'jawj/IKEv2-setup' /etc/sysctl.conf || echo '
+# https://github.com/jawj/IKEv2-setup
 net.ipv4.ip_forward = 1
 net.ipv4.ip_no_pmtu_disc = 1
 net.ipv4.conf.all.rp_filter = 1
 net.ipv4.conf.all.accept_redirects = 0
 net.ipv4.conf.all.send_redirects = 0
-
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
 net.ipv6.conf.lo.disable_ipv6 = 1
@@ -184,7 +188,7 @@ sysctl -p
 
 # these ike and esp settings are tested on Mac 10.12, iOS 10 and Windows 10
 # iOS/Mac with appropriate configuration profiles use AES_GCM_16_256/PRF_HMAC_SHA2_256/ECP_521 
-# Windows 10 uses AES_CBC_256/HMAC_SHA2_256_128/PRF_HMAC_SHA2_256/MODP_1024 
+# Windows 10 uses AES_CBC_256/HMAC_SHA2_256_128/PRF_HMAC_SHA2_256/ECP_384 
 
 echo "config setup
   strictcrlpolicy=yes
@@ -242,7 +246,8 @@ sed -r \
 -e 's/^#?UsePAM yes$/UsePAM no/' \
 -i.original /etc/ssh/sshd_config
 
-echo "
+grep -Fq 'jawj/IKEv2-setup' /etc/ssh/sshd_config || echo "
+# https://github.com/jawj/IKEv2-setup
 MaxStartups 1
 MaxAuthTries 2
 UseDNS no" >> /etc/ssh/sshd_config
@@ -263,7 +268,9 @@ sed -r \
 -e 's/^inet_interfaces =.*$/inet_interfaces = loopback-only/' \
 -i.original /etc/postfix/main.cf
 
-echo "root: ${EMAIL}
+grep -Fq 'jawj/IKEv2-setup' /etc/aliases || echo "
+# https://github.com/jawj/IKEv2-setup
+root: ${EMAIL}
 ${LOGINUSERNAME}: ${EMAIL}
 " >> /etc/aliases
 
