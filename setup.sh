@@ -10,6 +10,8 @@
 # chmod u+x setup.sh
 # ./setup.sh
 
+if [[ $(id -u) -ne 0 ]]; then echo "Please run as root (e.g. sudo ./path/to/this/script)"; exit 1; fi
+
 echo
 echo "=== Requesting configuration data ==="
 echo
@@ -294,12 +296,14 @@ APT::Periodic::Unattended-Upgrade "1";
 
 service unattended-upgrades restart
 
-
 echo
 echo "=== Creating Apple .mobileconfig file ==="
 echo
 
-echo "<?xml version='1.0' encoding='UTF-8'?>
+cd /home/${LOGINUSERNAME}
+
+cat << EOF > vpn-ios-or-mac.mobileconfig
+<?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE plist PUBLIC '-//Apple//DTD PLIST 1.0//EN' 'http://www.apple.com/DTDs/PropertyList-1.0.dtd'>
 <plist version='1.0'>
 <dict>
@@ -406,19 +410,10 @@ echo "<?xml version='1.0' encoding='UTF-8'?>
   <integer>1</integer>
 </dict>
 </plist>
-" > vpn.mobileconfig
+EOF
 
-cat << EOF | mail -r $USER@$VPNHOST -s "VPN configuration" -A vpn.mobileconfig $EMAIL
-== iOS and macOS ==
-  
-A configuration profile is attached — please tap or double-click to install. 
-
-You will be asked for your device PIN or password, and your VPN username and password.
-
-
-== Windows 10 ==
-  
-Run the following commands in PowerShell:
+cat << EOF > vpn-win10-instructions.txt
+Please run the following commands in PowerShell:
   
 Add-VpnConnection -Name "${VPNHOST}" \`
   -ServerAddress "${VPNHOST}" \`
@@ -434,9 +429,86 @@ Set-VpnConnectionIPsecConfiguration -ConnectionName "${VPNHOST}" \`
   -DHGroup ECP384 \`
   -PfsGroup ECP384 \`
   -Force
+EOF
 
+cat << EOF > vpn-ubuntu-client.sh
+#!/bin/bash -e
+if [[ $(id -u) -ne 0 ]]; then echo "Please run as root (e.g. sudo ./path/to/this/script)"; exit 1; fi
+
+read -p "VPN username (same as entered on server): " VPNUSERNAME
+while true; do
+read -s -p "VPN password (same as entered on server): " VPNPASSWORD
+echo
+read -s -p "Confirm VPN password: " VPNPASSWORD2
+echo
+[ "\$VPNPASSWORD" = "\$VPNPASSWORD2" ] && break
+echo "Passwords didn't match -- please try again"
+done
+
+apt-get install strongswan libstrongswan-standard-plugins libcharon-extra-plugins
+apt-get install libcharon-standard-plugins || true  # 17.04+ only
+
+ln -f -s /etc/ssl/certs/DST_Root_CA_X3.pem /etc/ipsec.d/cacerts/
+
+grep -Fq 'jawj/IKEv2-setup' /etc/ipsec.conf || echo '
+# https://github.com/jawj/IKEv2-setup
+conn ikev2vpn
+        ikelifetime=60m
+        keylife=20m
+        rekeymargin=3m
+        keyingtries=1
+        keyexchange=ikev2
+        ike=aes256gcm16-sha256-ecp521!
+        esp=aes256gcm16-sha256!
+        leftsourceip=%config
+        leftauth=eap-mschapv2
+        eap_identity=\${VPNUSERNAME}
+        right=${VPNHOST}
+        rightauth=pubkey
+        rightid=@${VPNHOST}
+        rightsubnet=0.0.0.0/0
+        auto=add  # or auto=start to bring up automatically
+' >> /etc/ipsec.conf
+
+grep -Fq 'jawj/IKEv2-setup' /etc/ipsec.secrets || echo '
+# https://github.com/jawj/IKEv2-setup
+\${VPNUSERNAME} %any : EAP "\${VPNPASSWORD}"
+' >> /etc/ipsec.secrets
+
+ipsec restart
+
+echo "Bringing up VPN ..."
+ipsec up ikev2vpn  # if you didn't set auto=start
+ipsec statusall
+
+echo -n "Testing IP address ... "
+VPNIP=$(dig -4 +short ${VPNHOST})
+ACTUALIP=$(curl -s ifconfig.co)
+if [[ $VPNIP = $ACTUALIP ]]; then echo "PASSED"; else echo "FAILED"; fi
+
+echo
+echo "To disconnect: ipsec down ikev2vpn"
+echo "To resconnect: ipsec up ikev2vpn"
+echo "To connect automatically: change auto=add to auto=start in /etc/ipsec.conf"
+EOF
+
+
+cat << EOF | mail -r $USER@$VPNHOST -s "VPN configuration" -A vpn-ios-or-mac.mobileconfig -A vpn-win10-instructions.txt -A vpn-ubuntu-client.sh $EMAIL
+== iOS and macOS ==
+A configuration profile is attached as vpn-ios-or-mac.mobileconfig — please tap or double-click to install. You will be asked for your device PIN or password, and your VPN username and password.
+
+== Windows ==
+Instructions for setting up your VPN via PowerShell are attached as vpn-win10-instructions.txt. You will need Windows 10 Pro or above.
+
+== Ubuntu ==
+A bash script to set up a strongSwan VPN client is attached as vpn-ubuntu-client.sh. You will need to chmod +x then run it as root.
 
 EOF
+
+echo
+echo "=== How to connect ==="
+echo
+echo "Connection instructions have been emailed to you, and can also be found in your home directory, /home/${LOGINUSERNAME}"
 
 # necessary for IKEv2?
 # Windows: https://support.microsoft.com/en-us/kb/926179
