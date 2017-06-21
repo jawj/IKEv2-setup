@@ -497,13 +497,28 @@ EOF
 
 cat << EOF | mail -r $USER@$VPNHOST -s "VPN configuration" -A vpn-ios-or-mac.mobileconfig -A vpn-win10-instructions.txt -A vpn-ubuntu-client.sh $EMAIL
 == iOS and macOS ==
-A configuration profile is attached as vpn-ios-or-mac.mobileconfig — please tap or double-click to install. You will be asked for your device PIN or password, and your VPN username and password.
+
+A configuration profile is attached as vpn-ios-or-mac.mobileconfig — simply open this to install. You will be asked for your device PIN or password, and your VPN username and password.
+
+
+== Android ==
+
+Download the strongSwan app from the Play Store: https://play.google.com/store/apps/details?id=org.strongswan.android
+
+Server: ${VPNHOST}
+VPN Type: IKEv2 EAP (Username/Password)
+Username and password: as configured on the server
+CA certificate: Select automatically
+
 
 == Windows ==
-Instructions for setting up your VPN via PowerShell are attached as vpn-win10-instructions.txt. You will need Windows 10 Pro or above.
+
+PowerShell commands for setting up your VPN via are attached as vpn-win10-instructions.txt. You will need Windows 10 Pro or above.
+
 
 == Ubuntu ==
-A bash script to set up a strongSwan VPN client is attached as vpn-ubuntu-client.sh. You will need to chmod +x then run it as root.
+
+A bash script to set up the strongSwan VPN client is attached as vpn-ubuntu-client.sh. You will need to chmod +x and then run the script as root.
 
 EOF
 
