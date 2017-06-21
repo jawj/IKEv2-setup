@@ -2,24 +2,31 @@
 
 ## What?
 
-A script to take Ubuntu Server 17.04 from clean install to production-ready IKEv2 VPN with strongSwan.
+A Bash script that takes Ubuntu Server 17.04 from clean install to production-ready IKEv2 VPN with strongSwan. Comments and pull requests welcome.
 
-* The VPN server identifies itself with a Let's Encrypt certificate, so there's no need for clients to install private certificates — they can simply authenticate with username and password (EAP-MSCHAPv2). The Let's Encrypt certificate is set up to auto-renew.
-* The box is firewalled with `iptables` and configured for unattended security upgrades, so it should be safe to forget about until 17.04 reaches end-of-life.
-* A `.mobileconfig` profile is generated for Mac and iOS, to set up moderately secure ciphers and *Connect on demand* support, sending all traffic over the VPN. PowerShell commands are provided to configure secure ciphers on Windows 10. These are sent by email.
+### VPN server
 
-Comments and pull requests are welcomed.
+* The VPN server identifies itself with a Let's Encrypt certificate, so there's no need for clients to install private certificates — they can simply authenticate with username and password (EAP-MSCHAPv2).
+* The box is firewalled with `iptables` and configured for unattended security upgrades, and the Let's Encrypt certificate is set up to auto-renew, so it should be safe to forget about it all until 17.04 reaches end-of-life.
+* The cheapest VPSs offered by Linode, OVH and Vultr, and Scaleway's ARM64-2GB, have all been tested working as VPN servers. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered.
 
-### Compatibility
+### VPN clients
 
-* The setup script is tested working on the cheapest VPSs offered by Linode, OVH and Vultr, and on Scaleway's ARM64-2GB (on Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered).
-* The VPN configuration is tested working with the built-in VPN clients on OS X 10.12, iOS 10, Windows 10, the Android strongSwan client, and (unsurprisingly) strongSwan on Linux.
+The VPN is tested working with:
+
+*  **macOS 10.12 and iOS 10**  Built-in clients. A `.mobileconfig` profile is generated for Mac and iOS, to set up secure ciphers and enable *Connect on demand* support.
+* **Windows 10 Pro**  Built-in client. PowerShell commands are generated to configure the VPN and secure ciphers.
+* **Ubuntu 17.04**  Using strongSwan. A Bash script is generated to set this up.
+* **Android**  Using the strongSwan app.
+
+Configuration files, scripts and instructions are sent by email and also dropped in the user's home directory on the server.
 
 ### Caveats
 
-* The script will **not** work as-is on 16.04 LTS because the `certbot` package is outdated (and found under the name `letsencrypt`).
-* There's no IPv6 support — and, in fact, IPv6 networking is disabled — because I haven't got to grips with the security implications (e.g. `iptables` rules), and because supporting IPv6 prevents the use of `forceencaps`.
-* It's not recommended to use this unmodified on a server you use for anything else, as it does as it sees fit with various wider settings that may conflict with what you're doing.
+* The script **won't** work as-is on 16.04 LTS because the `certbot` package is outdated, found under the name `letsencrypt`, and doesn't renew certificates automatically.
+* There's no IPv6 support — and, in fact, IPv6 networking is disabled — because supporting IPv6 prevents the use of `forceencaps`, and honestly also because I haven't got to grips with the security implications (`ip6tables` rules and so on).
+* Don't use this unmodified on a server you use for anything else, as it does as it sees fit with various wider settings that may conflict with what you're doing.
+
 
 ## How?
 
@@ -40,6 +47,8 @@ If things don't work out right away ...
   * __On the server:__  Log in via SSH, then `sudo less +F /var/log/syslog`. To see startup logs, log in to another session and `sudo ipsec restart` there, then switch back. To see what's logged during a connection attempt, try to connect from a client. 
   
   * __On the client:__  On a Mac, open Console.app in /Applications/Utilities. If connecting from an iPhone, plug the iPhone into the Mac. Pick the relevant device (in the bar down the left), and filter the output (in the box at top right) to `nesession`, and try to connect. (On Windows or Linux I don't know where you find the logs — if _you_ know, feel free to write the explanation and send a pull request).
+  
+* The setup script is now idempotent — you can run it repeatedly with no ill effects — so, when you've fixed any issues, simply run it again.
   
 ### Users
 
