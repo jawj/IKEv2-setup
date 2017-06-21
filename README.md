@@ -14,10 +14,10 @@ A Bash script that takes Ubuntu Server 17.04 from clean install to production-re
 
 The VPN is tested working with:
 
-*  **macOS 10.12 and iOS 10**  Built-in clients. A `.mobileconfig` profile is generated for Mac and iOS, to set up secure ciphers and enable *Connect on demand* support.
-* **Windows 10 Pro**  Built-in client. PowerShell commands are generated to configure the VPN and secure ciphers.
-* **Ubuntu 17.04**  Using strongSwan. A Bash script is generated to set this up.
-* **Android**  Using the strongSwan app.
+*  **macOS 10.12 and iOS 10**  — Built-in clients. A `.mobileconfig` profile is generated for Mac and iOS, to set up secure ciphers and enable *Connect on demand* support.
+* **Windows 10 Pro** — Built-in client. PowerShell commands are generated to configure the VPN and secure ciphers.
+* **Ubuntu 17.04** — Using strongSwan. A Bash script is generated to set this up.
+* **Android** — Using the strongSwan app.
 
 Configuration files, scripts and instructions are sent by email and also dropped in the user's home directory on the server.
 
