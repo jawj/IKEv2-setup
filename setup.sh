@@ -49,7 +49,7 @@ echo
 echo "** Note: hostname must resolve to this machine already, to enable Let's Encrypt certificate setup **"
 read -p "Hostname for VPN (e.g. vpn.example.com): " VPNHOST
 
-VPNHOSTIP=$(dig -4 +short $VPNHOST)
+VPNHOSTIP=$(dig -4 +short "$VPNHOST")
 if [[ -z "$VPNHOSTIP" ]]; then
   echo
   echo "Cannot resolve VPN hostname, aborting"
@@ -59,7 +59,7 @@ fi
 rm -f /tmp/ikev2-setup.iptest
 nc -l 9999 > /tmp/ikev2-setup.iptest &
 NCPID=$!
-echo "bananas" | nc -w 1 -N $VPNHOST 9999  # -w 1 => 1 second timeout
+echo "bananas" | nc -w 1 -N "$VPNHOST" 9999  # -w 1 => 1 second timeout
 sleep .1
 IPTESTRESULT=$(cat /tmp/ikev2-setup.iptest)
 if [[ "$IPTESTRESULT" != "bananas" ]]; then
