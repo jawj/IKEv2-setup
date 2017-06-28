@@ -8,7 +8,7 @@ A Bash script that takes Ubuntu Server 17.04 from clean install to production-re
 
 * The VPN server identifies itself with a Let's Encrypt certificate, so there's no need for clients to install private certificates — they can simply authenticate with username and password (EAP-MSCHAPv2).
 * The box is firewalled with `iptables` and configured for unattended security upgrades, and the Let's Encrypt certificate is set up to auto-renew, so it should be safe to forget about it all until 17.04 reaches end-of-life.
-* The cheapest VPSs offered by Linode, OVH and Vultr, and Scaleway's ARM64-2GB, have all been tested working as VPN servers. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered.
+* The cheapest VPSs offered by Linode, OVH and Vultr, and Scaleway's ARM64-2GB, have all been tested working as VPN servers. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
 
 ### VPN clients
 
