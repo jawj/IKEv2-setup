@@ -57,9 +57,10 @@ if [[ -z "$VPNHOSTIP" ]]; then
 fi
 
 rm -f /tmp/ikev2-setup.iptest
-nc -l 8765 > /tmp/ikev2-setup.iptest &
+nc -l 9999 > /tmp/ikev2-setup.iptest &
 NCPID=$!
-echo "bananas" | nc -w 1 -N $VPNHOST 8765  # -w 1 => 1 second timeout
+echo "bananas" | nc -w 1 -N $VPNHOST 9999  # -w 1 => 1 second timeout
+sleep .1
 IPTESTRESULT=$(cat /tmp/ikev2-setup.iptest)
 if [[ "$IPTESTRESULT" != "bananas" ]]; then
   kill $NCPID
@@ -505,7 +506,7 @@ EOF
 cat << EOF > vpn-instructions.txt
 == iOS and macOS ==
 
-A configuration profile is attached as vpn-ios-or-mac.mobileconfig — simply open this to install. You will be asked for your device PIN or password, and your VPN username and password.
+A configuration profile is attached as vpn-ios-or-mac.mobileconfig — simply open this to install. You will be asked for your device PIN or password, and your VPN username and password, not necessarily in that order.
 
 
 == Windows ==
@@ -540,7 +541,7 @@ CA certificate: Select automatically
 
 == Ubuntu ==
 
-A bash script to set up the strongSwan VPN client is attached as vpn-ubuntu-client.sh. You will need to chmod +x and then run the script as root.
+A bash script to set up strongSwan as a VPN client is attached as vpn-ubuntu-client.sh. You will need to chmod +x and then run the script as root.
 
 EOF
 
