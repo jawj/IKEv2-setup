@@ -19,30 +19,6 @@ if [[ $(id -u) -ne 0 ]]; then
   exit 1
 fi
 
-echo "--- Configuration: general server settings ---"
-echo
-
-read -p "Timezone (default: Europe/London): " TZONE
-TZONE=${TZONE:-'Europe/London'}
-
-read -p "Email address for sysadmin (e.g. j.bloggs@example.com): " EMAIL
-
-read -p "SSH log-in port (default: 22): " SSHPORT
-SSHPORT=${SSHPORT:-22}
-
-echo
-
-read -p "SSH log-in username: " LOGINUSERNAME
-while true; do
-  read -s -p "SSH log-in password (must be REALLY STRONG): " LOGINPASSWORD
-  echo
-  read -s -p "Confirm SSH log-in password: " LOGINPASSWORD2
-  echo
-  [ "$LOGINPASSWORD" = "$LOGINPASSWORD2" ] && break
-  echo "Passwords didn't match -- please try again"
-done
-
-echo
 echo "--- Configuration: VPN settings ---"
 echo
 
@@ -56,18 +32,6 @@ if [[ -z "$VPNHOSTIP" ]]; then
   exit 1
 fi
 
-rm -f /tmp/ikev2-setup.iptest
-nc -l 9999 > /tmp/ikev2-setup.iptest &
-NCPID=$!
-echo "bananas" | nc -w 1 -N "$VPNHOST" 9999  # -w 1 => 1 second timeout
-sleep .1
-IPTESTRESULT=$(cat /tmp/ikev2-setup.iptest)
-if [[ "$IPTESTRESULT" != "bananas" ]]; then
-  kill $NCPID
-  echo "Cannot reach this machine on this hostname, aborting"
-  exit 1
-fi
-
 read -p "VPN username: " VPNUSERNAME
 while true; do
 read -s -p "VPN password (no quotes, please): " VPNPASSWORD
@@ -77,6 +41,31 @@ echo
 [ "$VPNPASSWORD" = "$VPNPASSWORD2" ] && break
 echo "Passwords didn't match -- please try again"
 done
+
+echo
+echo "--- Configuration: general server settings ---"
+echo
+
+read -p "Timezone (default: Europe/London): " TZONE
+TZONE=${TZONE:-'Europe/London'}
+
+read -p "Email address for sysadmin (e.g. j.bloggs@example.com): " EMAIL
+
+echo
+
+read -p "SSH log-in port (default: 22): " SSHPORT
+SSHPORT=${SSHPORT:-22}
+
+read -p "SSH log-in username: " LOGINUSERNAME
+while true; do
+  read -s -p "SSH log-in password (must be REALLY STRONG): " LOGINPASSWORD
+  echo
+  read -s -p "Confirm SSH log-in password: " LOGINPASSWORD2
+  echo
+  [ "$LOGINPASSWORD" = "$LOGINPASSWORD2" ] && break
+  echo "Passwords didn't match -- please try again"
+done
+
 
 VPNIPPOOL="10.10.10.0/24"
 
@@ -101,6 +90,11 @@ echo
 echo "Network interface: ${ETH0ORSIMILAR}"
 echo "External IP: ${IP}"
 
+if [[ "$IP" != "$VPNHOSTIP" ]]; then
+  echo "Warning: $VPNHOST resolves to $VPNHOSTIP, not $IP"
+  echo "Either you are behind NAT, or something is wrong"
+  read -p "Press [Return] to continue, or Ctrl-C to abort" DUMMYVAR
+fi
 
 echo
 echo "--- Configuring firewall ---"
@@ -512,7 +506,7 @@ A configuration profile is attached as vpn-ios-or-mac.mobileconfig — simply o
 == Windows ==
 
 You will need Windows 10 Pro or above. Please run the following commands in PowerShell:
-  
+
 Add-VpnConnection -Name "${VPNHOST}" \`
   -ServerAddress "${VPNHOST}" \`
   -TunnelType IKEv2 \`
@@ -545,8 +539,7 @@ A bash script to set up strongSwan as a VPN client is attached as vpn-ubuntu-cli
 
 EOF
 
-cat vpn-instructions.txt \
-  | mail -r $USER@$VPNHOST -s "VPN configuration" -A vpn-ios-or-mac.mobileconfig -A vpn-ubuntu-client.sh $EMAIL
+cat vpn-instructions.txt | mail -r $USER@$VPNHOST -s "VPN configuration" -A vpn-ios-or-mac.mobileconfig -A vpn-ubuntu-client.sh $EMAIL
 
 echo
 echo "--- How to connect ---"
