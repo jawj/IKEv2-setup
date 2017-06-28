@@ -10,10 +10,16 @@
 # chmod u+x setup.sh
 # ./setup.sh
 
-if [[ $(id -u) -ne 0 ]]; then echo "Please run as root (e.g. sudo ./path/to/this/script)"; exit 1; fi
-
 echo
-echo "=== Requesting configuration data ==="
+echo "=== https://github.com/jawj/IKEv2-setup ==="
+echo
+
+if [[ $(id -u) -ne 0 ]]; then 
+  echo "Please run as root (e.g. sudo ./path/to/this/script)"
+  exit 1
+fi
+
+echo "--- Configuration: general server settings ---"
 echo
 
 read -p "Timezone (default: Europe/London): " TZONE
@@ -21,24 +27,45 @@ TZONE=${TZONE:-'Europe/London'}
 
 read -p "Email address for sysadmin (e.g. j.bloggs@example.com): " EMAIL
 
-read -p "Port for SSH login (default: 22): " SSHPORT
+read -p "SSH log-in port (default: 22): " SSHPORT
 SSHPORT=${SSHPORT:-22}
 
 echo
 
-read -p "Login username: " LOGINUSERNAME
+read -p "SSH log-in username: " LOGINUSERNAME
 while true; do
-  read -s -p "Login password (must be STRONG!): " LOGINPASSWORD
+  read -s -p "SSH log-in password (must be REALLY STRONG): " LOGINPASSWORD
   echo
-  read -s -p "Confirm login password: " LOGINPASSWORD2
+  read -s -p "Confirm SSH log-in password: " LOGINPASSWORD2
   echo
   [ "$LOGINPASSWORD" = "$LOGINPASSWORD2" ] && break
   echo "Passwords didn't match -- please try again"
 done
+
+echo
+echo "--- Configuration: VPN settings ---"
 echo
 
-echo "** Hostname for VPN must ALREADY resolve to this machine, to enable Let's Encrypt certificate setup **"
+echo "** Note: hostname must resolve to this machine already, to enable Let's Encrypt certificate setup **"
 read -p "Hostname for VPN (e.g. vpn.example.com): " VPNHOST
+
+VPNHOSTIP=$(dig -4 +short $VPNHOST)
+if [[ -z "$VPNHOSTIP" ]]; then
+  echo
+  echo "Cannot resolve VPN hostname, aborting"
+  exit 1
+fi
+
+rm -f /tmp/ikev2-setup.iptest
+nc -l 8765 > /tmp/ikev2-setup.iptest &
+NCPID=$!
+echo "bananas" | nc -w 1 -N $VPNHOST 8765  # -w 1 => 1 second timeout
+IPTESTRESULT=$(cat /tmp/ikev2-setup.iptest)
+if [[ "$IPTESTRESULT" != "bananas" ]]; then
+  kill $NCPID
+  echo "Cannot reach this machine on this hostname, aborting"
+  exit 1
+fi
 
 read -p "VPN username: " VPNUSERNAME
 while true; do
@@ -54,7 +81,7 @@ VPNIPPOOL="10.10.10.0/24"
 
 
 echo
-echo "=== Updating and installing software ==="
+echo "--- Updating and installing software ---"
 echo
 
 export DEBIAN_FRONTEND=noninteractive
@@ -75,7 +102,7 @@ echo "External IP: ${IP}"
 
 
 echo
-echo "=== Configuring firewall ==="
+echo "--- Configuring firewall ---"
 echo
 
 # firewall
@@ -141,7 +168,7 @@ dpkg-reconfigure iptables-persistent
 
 
 echo
-echo "=== Configuring RSA certificates ==="
+echo "--- Configuring RSA certificates ---"
 echo
 
 mkdir -p /etc/letsencrypt
@@ -167,7 +194,7 @@ aa-status --enabled && invoke-rc.d apparmor reload
 
 
 echo
-echo "=== Configuring VPN ==="
+echo "--- Configuring VPN ---"
 echo
 
 # ip_forward is for VPN
@@ -231,7 +258,7 @@ ipsec restart
 
 
 echo
-echo "=== User ==="
+echo "--- User ---"
 echo
 
 # user + SSH
@@ -258,7 +285,7 @@ service ssh restart
 
 
 echo
-echo "=== Timezone, mail, unattended upgrades ==="
+echo "--- Timezone, mail, unattended upgrades ---"
 echo
 
 timedatectl set-timezone $TZONE
@@ -297,7 +324,7 @@ APT::Periodic::Unattended-Upgrade "1";
 service unattended-upgrades restart
 
 echo
-echo "=== Creating configuration files ==="
+echo "--- Creating configuration files ---"
 echo
 
 cd /home/${LOGINUSERNAME}
@@ -412,25 +439,6 @@ cat << EOF > vpn-ios-or-mac.mobileconfig
 </plist>
 EOF
 
-cat << EOF > vpn-win10-instructions.txt
-Please run the following commands in PowerShell:
-  
-Add-VpnConnection -Name "${VPNHOST}" \`
-  -ServerAddress "${VPNHOST}" \`
-  -TunnelType IKEv2 \`
-  -EncryptionLevel Maximum \`
-  -AuthenticationMethod EAP
-
-Set-VpnConnectionIPsecConfiguration -ConnectionName "${VPNHOST}" \`
-  -AuthenticationTransformConstants GCMAES256 \`
-  -CipherTransformConstants GCMAES256 \`
-  -EncryptionMethod AES256 \`
-  -IntegrityCheckMethod SHA256 \`
-  -DHGroup ECP384 \`
-  -PfsGroup ECP384 \`
-  -Force
-EOF
-
 cat << EOF > vpn-ubuntu-client.sh
 #!/bin/bash -e
 if [[ \$(id -u) -ne 0 ]]; then echo "Please run as root (e.g. sudo ./path/to/this/script)"; exit 1; fi
@@ -486,7 +494,7 @@ echo
 echo -n "Testing IP address ... "
 VPNIP=\$(dig -4 +short ${VPNHOST})
 ACTUALIP=\$(curl -s ifconfig.co)
-if [[ "\$VPNIP" = "\$ACTUALIP" ]]; then echo "PASSED (IP: \${VPNIP})"; else echo "FAILED (IP: \${ACTUALIP}, VPN IP: \${VPNIP})"; fi
+if [[ "\$VPNIP" == "\$ACTUALIP" ]]; then echo "PASSED (IP: \${VPNIP})"; else echo "FAILED (IP: \${ACTUALIP}, VPN IP: \${VPNIP})"; fi
 
 echo
 echo "To disconnect: ipsec down ikev2vpn"
@@ -494,11 +502,30 @@ echo "To resconnect: ipsec up ikev2vpn"
 echo "To connect automatically: change auto=add to auto=start in /etc/ipsec.conf"
 EOF
 
-
-cat << EOF | mail -r $USER@$VPNHOST -s "VPN configuration" -A vpn-ios-or-mac.mobileconfig -A vpn-win10-instructions.txt -A vpn-ubuntu-client.sh $EMAIL
+cat << EOF > vpn-instructions.txt
 == iOS and macOS ==
 
 A configuration profile is attached as vpn-ios-or-mac.mobileconfig — simply open this to install. You will be asked for your device PIN or password, and your VPN username and password.
+
+
+== Windows ==
+
+You will need Windows 10 Pro or above. Please run the following commands in PowerShell:
+  
+Add-VpnConnection -Name "${VPNHOST}" \`
+  -ServerAddress "${VPNHOST}" \`
+  -TunnelType IKEv2 \`
+  -EncryptionLevel Maximum \`
+  -AuthenticationMethod EAP
+
+Set-VpnConnectionIPsecConfiguration -ConnectionName "${VPNHOST}" \`
+  -AuthenticationTransformConstants GCMAES256 \`
+  -CipherTransformConstants GCMAES256 \`
+  -EncryptionMethod AES256 \`
+  -IntegrityCheckMethod SHA256 \`
+  -DHGroup ECP384 \`
+  -PfsGroup ECP384 \`
+  -Force
 
 
 == Android ==
@@ -511,19 +538,17 @@ Username and password: as configured on the server
 CA certificate: Select automatically
 
 
-== Windows ==
-
-PowerShell commands for setting up your VPN via are attached as vpn-win10-instructions.txt. You will need Windows 10 Pro or above.
-
-
 == Ubuntu ==
 
 A bash script to set up the strongSwan VPN client is attached as vpn-ubuntu-client.sh. You will need to chmod +x and then run the script as root.
 
 EOF
 
+cat vpn-instructions.txt \
+  | mail -r $USER@$VPNHOST -s "VPN configuration" -A vpn-ios-or-mac.mobileconfig -A vpn-ubuntu-client.sh $EMAIL
+
 echo
-echo "=== How to connect ==="
+echo "--- How to connect ---"
 echo
 echo "Connection instructions have been emailed to you, and can also be found in your home directory, /home/${LOGINUSERNAME}"
 
