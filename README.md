@@ -19,7 +19,7 @@ The VPN is tested working with:
 * **Ubuntu 17.04** — Using strongSwan. A Bash script is generated to set this up.
 * **Android** — Using the strongSwan app.
 
-Configuration files, scripts and instructions are sent by email and also dropped in the user's home directory on the server.
+Configuration files, scripts and instructions are sent by email. They are also dropped in the newly-created non-root user's home directory on the server (this point may be important, because VPS providers sometimes block traffic on port 25 by default, and conscientious email providers will sometimes mark a successfully sent email as spam).
 
 ### Caveats
 
