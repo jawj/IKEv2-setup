@@ -79,6 +79,20 @@ Your traffic is not logged on the server, but if you're feeling especially paran
     sudo rm /var/log/syslog && sudo ln -s /dev/null /var/log/syslog
     sudo rm /var/log/auth.log && sudo ln -s /dev/null /var/log/auth.log
 
+### DNS Resolvers
+
+If you would prefer to use a non-logging DNS rather than Google's DNS, please find an up-to date list here: https://www.lifewire.com/free-and-public-dns-servers-2626062
+
+For example to use DNS.WATCH:
+
+sudo nano /etc/ipsec.conf
+
+Edit DNS resolvers, so that rightdns=8.8.8.8,8.8.4.4 becomes rightdns=84.200.69.80,84.200.70.40
+
+To exit nano it's `Ctrl + O` then `Ctrl + X`, and to have strongSwan pick up the changes it's:
+
+sudo ipsec restart
+
 ## Why?
 
 We use a similar setup as a corporate VPN at [PSYT](http://psyt.co.uk). And I use this to bounce my personal web browsing via Europe, in the hope of giving Theresa May's [Investigatory Powers Bill](https://www.openrightsgroup.org/blog/2015/investigatory-powers-bill-published-and-now-the-fight-is-on) the finger.
