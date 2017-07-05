@@ -69,6 +69,17 @@ done
 
 VPNIPPOOL="10.10.10.0/24"
 
+#DNS Resolvers
+#Copyright 2017 Nyr, Angristan & AdamLUK
+echo "What DNS do you want to use with the VPN?"
+echo "   1) Current system resolvers (in /etc/resolv.conf)"
+echo "   2) FDN (France)"
+echo "   3) DNS.WATCH (Germany)"
+echo "   4) OpenDNS (Anycast: worldwide)"
+echo "   5) Google (Anycast: worldwide)"
+echo "   6) Yandex Basic (Russia)"
+read -p "DNS [1-6]: " -e -i 1 DNS
+echo
 
 echo
 echo "--- Updating and installing software ---"
@@ -238,12 +249,34 @@ conn roadwarrior
   right=%any
   rightid=%any
   rightauth=eap-mschapv2
-  eap_identity=%any
-  rightdns=8.8.8.8,8.8.4.4
-  rightsourceip=${VPNIPPOOL}
-  rightsendcert=never
-" > /etc/ipsec.conf
-
+  eap_identity=%any" > /etc/ipsec.conf
+      # DNS
+	    case $DNS in
+		1) 
+		# Obtain the resolvers from resolv.conf and use them for VPN
+		grep -v '#' /etc/resolv.conf | grep 'nameserver' | grep -E -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | while read line; do
+			echo "push \"rightdns=$line\"" >> /etc/ipsec.conf
+		done
+		;;
+		2) #FDN
+		echo 'push "rightdns=80.67.169.12,80.67.169.40"' >> /etc/ipsec.conf
+		;;
+		3) #DNS.WATCH
+		echo 'push "rightdns=84.200.69.80,84.200.70.40"' >> /etc/ipsec.conf
+		;;
+		4) #OpenDNS
+		echo 'push "rightdns=208.67.222.222,208.67.220.220"' >> /etc/ipsec.conf
+		;;
+		5) #Google
+		echo 'push "rightdns=8.8.8.8,8.8.4.4"' >> /etc/ipsec.conf
+		;;
+		6) #Yandex Basic
+		echo 'push "rightdns=77.88.8.8,77.88.8.1"' >> /etc/ipsec.conf
+		;;
+	esac
+  echo "rightsourceip=${VPNIPPOOL}
+  rightsendcert=never" >> /etc/ipsec.conf
+  
 echo "${VPNHOST} : RSA \"privkey.pem\"
 ${VPNUSERNAME} %any : EAP \""${VPNPASSWORD}"\"
 " > /etc/ipsec.secrets
