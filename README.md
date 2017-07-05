@@ -85,13 +85,13 @@ If you would prefer to use a non-logging DNS rather than Google's DNS, please fi
 
 For example to use DNS.WATCH:
 
-sudo nano /etc/ipsec.conf
+    sudo nano /etc/ipsec.conf
 
-Edit DNS resolvers, so that rightdns=8.8.8.8,8.8.4.4 becomes rightdns=84.200.69.80,84.200.70.40
+Edit DNS resolvers, so that `rightdns=8.8.8.8,8.8.4.4` becomes `rightdns=84.200.69.80,84.200.70.40`
 
 To exit nano it's `Ctrl + O` then `Ctrl + X`, and to have strongSwan pick up the changes it's:
 
-sudo ipsec restart
+    sudo ipsec restart
 
 ## Why?
 
