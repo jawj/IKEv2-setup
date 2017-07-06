@@ -14,8 +14,13 @@ echo
 echo "=== https://github.com/jawj/IKEv2-setup ==="
 echo
 
+if [[ $(lsb_release -rs) != "17.04" ]]; then 
+  echo "This script is for Ubuntu 17.04. It will not work on earlier releases and may not work on later ones. Exiting."
+  exit 1
+fi
+
 if [[ $(id -u) -ne 0 ]]; then 
-  echo "Please run as root (e.g. sudo ./path/to/this/script)"
+  echo "Please re-run as root (e.g. sudo ./path/to/this/script)"
   exit 1
 fi
 
