@@ -14,15 +14,13 @@ echo
 echo "=== https://github.com/jawj/IKEv2-setup ==="
 echo
 
-if [[ $(lsb_release -rs) != "17.04" ]]; then 
-  echo "This script is for Ubuntu 17.04. It will not work on earlier releases and may not work on later ones. Exiting."
+function exit_badly {
+  echo $1
   exit 1
-fi
+}
 
-if [[ $(id -u) -ne 0 ]]; then 
-  echo "Please re-run as root (e.g. sudo ./path/to/this/script)"
-  exit 1
-fi
+[[ $(lsb_release -rs) == "17.04" ]] || exit_badly "This script is for Ubuntu 17.04 only"
+[[ $(id -u) -eq 0 ]] || exit_badly "Please re-run as root (e.g. sudo ./path/to/this/script)"
 
 echo "--- Configuration: VPN settings ---"
 echo
