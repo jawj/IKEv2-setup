@@ -29,7 +29,7 @@ echo "** Note: hostname must resolve to this machine already, to enable Let's En
 read -p "Hostname for VPN (e.g. vpn.example.com): " VPNHOST
 
 VPNHOSTIP=$(dig -4 +short "$VPNHOST")
-[[ -z "$VPNHOSTIP" ]] || exit_badly "Cannot resolve VPN hostname, aborting"
+[[ -n "$VPNHOSTIP" ]] || exit_badly "Cannot resolve VPN hostname, aborting"
 
 read -p "VPN username: " VPNUSERNAME
 while true; do
