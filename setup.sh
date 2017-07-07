@@ -19,7 +19,7 @@ function exit_badly {
   exit 1
 }
 
-[[ $(lsb_release -rs) == "17.04" ]] || exit_badly "This script is for Ubuntu 17.04 only"
+[[ $(lsb_release -rs) == "17.04" ]] || exit_badly "This script is for Ubuntu 17.04 only, aborting"
 [[ $(id -u) -eq 0 ]] || exit_badly "Please re-run as root (e.g. sudo ./path/to/this/script)"
 
 echo "--- Configuration: VPN settings ---"
@@ -29,11 +29,7 @@ echo "** Note: hostname must resolve to this machine already, to enable Let's En
 read -p "Hostname for VPN (e.g. vpn.example.com): " VPNHOST
 
 VPNHOSTIP=$(dig -4 +short "$VPNHOST")
-if [[ -z "$VPNHOSTIP" ]]; then
-  echo
-  echo "Cannot resolve VPN hostname, aborting"
-  exit 1
-fi
+[[ -z "$VPNHOSTIP" ]] || exit_badly "Cannot resolve VPN hostname, aborting"
 
 read -p "VPN username: " VPNUSERNAME
 while true; do
@@ -95,7 +91,7 @@ echo "External IP: ${IP}"
 
 if [[ "$IP" != "$VPNHOSTIP" ]]; then
   echo "Warning: $VPNHOST resolves to $VPNHOSTIP, not $IP"
-  echo "Either you are behind NAT, or something is wrong"
+  echo "Either you are behind NAT, or something is wrong (e.g. hostname points to wrong IP, CloudFlare proxying shenanigans, ...)"
   read -p "Press [Return] to continue, or Ctrl-C to abort" DUMMYVAR
 fi
 
