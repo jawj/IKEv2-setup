@@ -2,19 +2,19 @@
 
 ## What?
 
-A Bash script that takes Ubuntu Server 17.04 from clean install to production-ready IKEv2 VPN with strongSwan. Comments and pull requests welcome.
+A Bash script that takes Ubuntu Server 17.10 (and probably also 17.04 or 16.10, but these are no longer tested) from clean install to production-ready IKEv2 VPN with strongSwan. Comments and pull requests welcome.
 
 ### VPN server
 
 * The VPN server identifies itself with a Let's Encrypt certificate, so there's no need for clients to install private certificates — they can simply authenticate with username and password (EAP-MSCHAPv2).
-* The box is firewalled with `iptables` and configured for unattended security upgrades, and the Let's Encrypt certificate is set up to auto-renew, so it should be safe to forget about it all until 17.04 reaches end-of-life.
+* The box is firewalled with `iptables` and configured for unattended security upgrades, and the Let's Encrypt certificate is set up to auto-renew, so it should be safe to forget about it all until 17.10 reaches end-of-life.
 * The cheapest VPSs offered by Linode, OVH and Vultr, and Scaleway's ARM64-2GB, have all been tested working as VPN servers. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
 
 ### VPN clients
 
 The VPN is tested working with:
 
-*  **macOS 10.12 and iOS 10**  — Built-in clients. A `.mobileconfig` profile is generated for Mac and iOS, to set up secure ciphers and enable *Connect on demand* support.
+*  **macOS 10.12 + 10.13, iOS 10 + 11**  — Built-in clients. A `.mobileconfig` profile is generated for Mac and iOS, to set up secure ciphers and enable *Connect on demand* support.
 * **Windows 10 Pro** — Built-in client. PowerShell commands are generated to configure the VPN and secure ciphers.
 * **Ubuntu 17.04** — Using strongSwan. A Bash script is generated to set this up.
 * **Android** — Using the strongSwan app.
@@ -30,7 +30,7 @@ Configuration files, scripts and instructions are sent by email. They are also d
 
 ## How?
 
-* Start with a clean Ubuntu 17.04 Server installation.
+* Start with a clean Ubuntu 17.10 Server installation.
 
 * Pick a domain name for the VPN server and **ensure that it already resolves to the correct IP**. _Let's Encrypt_ needs this in order to create your server certificate.
 
