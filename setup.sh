@@ -74,7 +74,7 @@ echo "--- Updating and installing software ---"
 echo
 
 export DEBIAN_FRONTEND=noninteractive
-apt-get update && apt-get upgrade -y
+apt-get -o Acquire::ForceIPv4=true update && apt-get upgrade -y
 
 debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
