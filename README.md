@@ -1,4 +1,7 @@
-- [IKEv2-setup](#ikev2-setup)
+# IKEv2-setup
+
+## Table of Contents
+
   * [What?](#what-)
     + [VPN server](#vpn-server)
     + [VPN clients](#vpn-clients)
@@ -10,9 +13,6 @@
     + [Bonus paranoia](#bonus-paranoia)
   * [Why?](#why-)
     + [Why IKEv2?](#why-ikev2-)
-
-
-# IKEv2-setup
 
 ## What?
 
