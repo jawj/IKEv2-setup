@@ -173,7 +173,7 @@ post-hook = /sbin/iptables -D INPUT -p tcp --dport 443 -j ACCEPT
 renew-hook = /usr/sbin/ipsec reload && /usr/sbin/ipsec secrets
 ' > /etc/letsencrypt/cli.ini
 
-certbot certonly --non-interactive --agree-tos --email $EMAIL --standalone -d $VPNHOST
+certbot certonly --non-interactive --agree-tos --standalone --preferred-challenges tls-sni --email $EMAIL -d $VPNHOST
 
 ln -f -s /etc/letsencrypt/live/$VPNHOST/cert.pem    /etc/ipsec.d/certs/cert.pem
 ln -f -s /etc/letsencrypt/live/$VPNHOST/privkey.pem /etc/ipsec.d/private/privkey.pem
