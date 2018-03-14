@@ -8,7 +8,7 @@
 # == Then run this script
 # wget https://raw.githubusercontent.com/jawj/IKEv2-setup/master/setup.sh
 # chmod u+x setup.sh
-# ./setup.sh
+# ./setup.sh
 
 echo
 echo "=== https://github.com/jawj/IKEv2-setup ==="
@@ -38,7 +38,7 @@ echo
 read -s -p "Confirm VPN password: " VPNPASSWORD2
 echo
 [ "$VPNPASSWORD" = "$VPNPASSWORD2" ] && break
-echo "Passwords didn't match -- please try again"
+echo "Passwords didn't match -- please try again"
 done
 
 echo
@@ -62,7 +62,7 @@ while true; do
   read -s -p "Confirm SSH log-in password: " LOGINPASSWORD2
   echo
   [ "$LOGINPASSWORD" = "$LOGINPASSWORD2" ] && break
-  echo "Passwords didn't match -- please try again"
+  echo "Passwords didn't match -- please try again"
 done
 
 
@@ -168,12 +168,12 @@ echo
 mkdir -p /etc/letsencrypt
 
 echo 'rsa-key-size = 4096
-pre-hook = /sbin/iptables -I INPUT -p tcp --dport 443 -j ACCEPT
-post-hook = /sbin/iptables -D INPUT -p tcp --dport 443 -j ACCEPT
+pre-hook = /sbin/iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+post-hook = /sbin/iptables -D INPUT -p tcp --dport 80 -j ACCEPT
 renew-hook = /usr/sbin/ipsec reload && /usr/sbin/ipsec secrets
 ' > /etc/letsencrypt/cli.ini
 
-certbot certonly --non-interactive --agree-tos --standalone --preferred-challenges tls-sni --email $EMAIL -d $VPNHOST
+certbot certonly --non-interactive --agree-tos --standalone --preferred-challenges http --email $EMAIL -d $VPNHOST
 
 ln -f -s /etc/letsencrypt/live/$VPNHOST/cert.pem    /etc/ipsec.d/certs/cert.pem
 ln -f -s /etc/letsencrypt/live/$VPNHOST/privkey.pem /etc/ipsec.d/private/privkey.pem
@@ -444,7 +444,7 @@ echo
 read -s -p "Confirm VPN password: " VPNPASSWORD2
 echo
 [ "\$VPNPASSWORD" = "\$VPNPASSWORD2" ] && break
-echo "Passwords didn't match -- please try again"
+echo "Passwords didn't match -- please try again"
 done
 
 apt-get install -y strongswan libstrongswan-standard-plugins libcharon-extra-plugins
@@ -499,7 +499,7 @@ EOF
 cat << EOF > vpn-instructions.txt
 == iOS and macOS ==
 
-A configuration profile is attached as vpn-ios-or-mac.mobileconfig — simply open this to install. You will be asked for your device PIN or password, and your VPN username and password, not necessarily in that order.
+A configuration profile is attached as vpn-ios-or-mac.mobileconfig — simply open this to install. You will be asked for your device PIN or password, and your VPN username and password, not necessarily in that order.
 
 
 == Windows ==
