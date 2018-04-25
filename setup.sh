@@ -510,7 +510,8 @@ Add-VpnConnection -Name "${VPNHOST}" \`
   -ServerAddress "${VPNHOST}" \`
   -TunnelType IKEv2 \`
   -EncryptionLevel Maximum \`
-  -AuthenticationMethod EAP
+  -AuthenticationMethod EAP \`
+  -RememberCredential
 
 Set-VpnConnectionIPsecConfiguration -ConnectionName "${VPNHOST}" \`
   -AuthenticationTransformConstants GCMAES256 \`
