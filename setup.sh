@@ -225,7 +225,7 @@ conn roadwarrior
   fragmentation=yes
   forceencaps=yes
   ike=aes256gcm16-sha256-ecp521,aes256-sha256-ecp384!
-  esp=aes256gcm16-sha256!
+  esp=aes256gcm16-sha256,aes256gcm16-ecp384!
   dpdaction=clear
   dpddelay=180s
   rekey=no
