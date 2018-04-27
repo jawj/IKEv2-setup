@@ -1,7 +1,6 @@
 #!/bin/bash -e
 
-# == Update to 17.10 if required:
-# nano /etc/update-manager/release-upgrades -> Prompt=normal
+# == Update to 18.04 if required:
 # apt-get update
 # do-release-upgrade
 
@@ -19,7 +18,7 @@ function exit_badly {
   exit 1
 }
 
-[[ $(lsb_release -rs) == "17.10" ]] || exit_badly "This script is for Ubuntu 17.10 only, aborting (if you know what you are doing, delete this check)."
+[[ $(lsb_release -rs) == "18.04" ]] || exit_badly "This script is for Ubuntu 18.04 only, aborting (if you know what you are doing, delete this check)."
 [[ $(id -u) -eq 0 ]] || exit_badly "Please re-run as root (e.g. sudo ./path/to/this/script)"
 
 echo "--- Configuration: VPN settings ---"
@@ -79,7 +78,7 @@ apt-get -o Acquire::ForceIPv4=true update && apt-get upgrade -y
 debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
 
-apt-get install -y language-pack-en strongswan strongswan-ikev2 libstrongswan-standard-plugins strongswan-libcharon libcharon-standard-plugins libcharon-extra-plugins moreutils iptables-persistent postfix mailutils unattended-upgrades certbot
+apt-get install -y language-pack-en strongswan libstrongswan-standard-plugins strongswan-libcharon libcharon-standard-plugins libcharon-extra-plugins moreutils iptables-persistent postfix mailutils unattended-upgrades certbot
 
 
 ETH0ORSIMILAR=$(ip route get 8.8.8.8 | awk -- '{printf $5}')
