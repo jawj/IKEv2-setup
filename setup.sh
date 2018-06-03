@@ -243,7 +243,7 @@ conn roadwarrior
 " > /etc/ipsec.conf
 
 echo "${VPNHOST} : RSA \"privkey.pem\"
-${VPNUSERNAME} %any : EAP \""${VPNPASSWORD}"\"
+${VPNUSERNAME} : EAP \""${VPNPASSWORD}"\"
 " > /etc/ipsec.secrets
 
 ipsec restart
