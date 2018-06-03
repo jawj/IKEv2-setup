@@ -473,7 +473,7 @@ conn ikev2vpn
 
 grep -Fq 'jawj/IKEv2-setup' /etc/ipsec.secrets || echo "
 # https://github.com/jawj/IKEv2-setup
-\${VPNUSERNAME} %any : EAP \"\${VPNPASSWORD}\"
+\${VPNUSERNAME} : EAP \"\${VPNPASSWORD}\"
 " >> /etc/ipsec.secrets
 
 ipsec restart
