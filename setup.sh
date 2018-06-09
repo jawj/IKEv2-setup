@@ -18,7 +18,7 @@ function exit_badly {
   exit 1
 }
 
-[[ $(lsb_release -rs) == "18.04" ]] || exit_badly "This script is for Ubuntu 18.04 only, aborting (if you know what you are doing, delete this check)."
+[[ $(lsb_release -rs) == "18.04" ]] || exit_badly "This script is for Ubuntu 18.04 only, aborting (if you know what you're doing, delete this check)."
 [[ $(id -u) -eq 0 ]] || exit_badly "Please re-run as root (e.g. sudo ./path/to/this/script)"
 
 echo "--- Configuration: VPN settings ---"
@@ -47,7 +47,7 @@ echo
 read -p "Timezone (default: Europe/London): " TZONE
 TZONE=${TZONE:-'Europe/London'}
 
-read -p "Email address for sysadmin (e.g. j.bloggs@example.com): " EMAIL
+read -p "Email address for sysadmin (e.g. j.bloggs@example.com): " EMAILADDR
 
 echo
 
@@ -78,7 +78,7 @@ apt-get -o Acquire::ForceIPv4=true update && apt-get upgrade -y
 debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
 
-apt-get install -y language-pack-en strongswan libstrongswan-standard-plugins strongswan-libcharon libcharon-standard-plugins libcharon-extra-plugins moreutils iptables-persistent postfix mailutils unattended-upgrades certbot
+apt-get install -y language-pack-en strongswan libstrongswan-standard-plugins strongswan-libcharon libcharon-standard-plugins libcharon-extra-plugins moreutils iptables-persistent postfix mutt unattended-upgrades certbot
 
 
 ETH0ORSIMILAR=$(ip route get 8.8.8.8 | awk -- '{printf $5}')
@@ -172,7 +172,7 @@ post-hook = /sbin/iptables -D INPUT -p tcp --dport 80 -j ACCEPT
 renew-hook = /usr/sbin/ipsec reload && /usr/sbin/ipsec secrets
 ' > /etc/letsencrypt/cli.ini
 
-certbot certonly --non-interactive --agree-tos --standalone --preferred-challenges http --email $EMAIL -d $VPNHOST
+certbot certonly --non-interactive --agree-tos --standalone --preferred-challenges http --email $EMAILADDR -d $VPNHOST
 
 ln -f -s /etc/letsencrypt/live/$VPNHOST/cert.pem    /etc/ipsec.d/certs/cert.pem
 ln -f -s /etc/letsencrypt/live/$VPNHOST/privkey.pem /etc/ipsec.d/private/privkey.pem
@@ -292,8 +292,8 @@ sed -r \
 
 grep -Fq 'jawj/IKEv2-setup' /etc/aliases || echo "
 # https://github.com/jawj/IKEv2-setup
-root: ${EMAIL}
-${LOGINUSERNAME}: ${EMAIL}
+root: ${EMAILADDR}
+${LOGINUSERNAME}: ${EMAILADDR}
 " >> /etc/aliases
 
 newaliases
@@ -538,7 +538,7 @@ A bash script to set up strongSwan as a VPN client is attached as vpn-ubuntu-cli
 
 EOF
 
-cat vpn-instructions.txt | mail -r $USER@$VPNHOST -s "VPN configuration" -A vpn-ios-or-mac.mobileconfig -A vpn-ubuntu-client.sh $EMAIL
+cat vpn-instructions.txt | EMAIL=$USER@$VPNHOST mutt -s "VPN configuration" -a vpn-ios-or-mac.mobileconfig vpn-ubuntu-client.sh -- $EMAILADDR
 
 echo
 echo "--- How to connect ---"
