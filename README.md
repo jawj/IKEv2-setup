@@ -72,7 +72,7 @@ To add or change VPN users, it's:
     
 Edit usernames and passwords as you see fit (but don't touch the first line, which specifies the server certificate). The line format for each user is:
 
-    someusername %any : EAP "somepassword"
+    someusername : EAP "somepassword"
 
 To exit nano it's `Ctrl + O` then `Ctrl + X`, and to have strongSwan pick up the changes it's:
 
