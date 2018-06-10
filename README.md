@@ -16,12 +16,12 @@
 
 ## What?
 
-A Bash script that takes Ubuntu Server 17.10 (and probably also 17.04 or 16.10, but these are no longer tested) from clean install to production-ready IKEv2 VPN with strongSwan. Comments and pull requests welcome.
+A Bash script that takes Ubuntu Server 18.04 LTS (and probably also 17.10, 17.04 or 16.10, but these are no longer tested) from clean install to production-ready IKEv2 VPN with strongSwan. Comments and pull requests welcome.
 
 ### VPN server
 
 * The VPN server identifies itself with a Let's Encrypt certificate, so there's no need for clients to install private certificates — they can simply authenticate with username and password (EAP-MSCHAPv2).
-* The box is firewalled with `iptables` and configured for unattended security upgrades, and the Let's Encrypt certificate is set up to auto-renew, so it should be safe to forget about it all until 17.10 reaches end-of-life.
+* The box is firewalled with `iptables` and configured for unattended security upgrades, and the Let's Encrypt certificate is set up to auto-renew, so it should be safe to forget about it all until 18.04 reaches end-of-life in 2023.
 * The cheapest VPSs offered by Linode, OVH, vps.ag and Vultr, and Scaleway's ARM64-2GB, have all been tested working as VPN servers. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
 
 ### VPN clients
@@ -44,7 +44,7 @@ Configuration files, scripts and instructions are sent by email. They are also d
 
 ## How?
 
-* Start with a clean Ubuntu 17.10 Server installation.
+* Start with a clean Ubuntu 18.04 Server installation.
 
 * Pick a domain name for the VPN server and **ensure that it already resolves to the correct IP**. _Let's Encrypt_ needs this in order to create your server certificate.
 
@@ -80,15 +80,13 @@ To exit nano it's `Ctrl + O` then `Ctrl + X`, and to have strongSwan pick up the
 
 ### Upgrades
 
-If you previously set this up on Ubuntu 16.10, you will need to manually amend the `ike`, `esp`, and `uniqueids` directives in `/etc/ipsec.conf` to reflect the current values in `setup.sh` after upgrading to 17.04. The newer version of strongSwan in 17.04 doesn't like different sorts of ciphers being smooshed together, and `uniqueids=no` now gives me problems trying to connect from two different devices with the same user name.
+If you're on a pre-18.04 version of Ubuntu, it's probably easiest to make a record of any changes to `ipsec.secrets`, blow the whole thing away and reinstall.
 
-Alternatively, it may be cleaner to make a record of any changes to `ipsec.secrets`, blow the whole thing away and reinstall.
-
-You will also need to recreate any Windows 10 VPNs using the provided PowerShell commands, since the less secure ciphers supported by GUI-created Windows VPNs are no longer enabled.
+If you're upgrading anyway, and you previously set this up on Ubuntu 16.10, you will need to manually amend the `ike`, `esp`, and `uniqueids` directives in `/etc/ipsec.conf` to reflect the current values in `setup.sh` after upgrading to 17.04+. The versions of strongSwan in 17.04+ don't like different sorts of ciphers being smooshed together, and `uniqueids=no` now gives me problems trying to connect from two different devices with the same user name. You will also need to recreate any Windows 10 VPNs using the provided PowerShell commands, since the less secure ciphers supported by GUI-created Windows VPNs are no longer enabled.
 
 ### Bonus paranoia
 
-Your traffic is not logged on the server, but if you're feeling especially paranoid there are various things you could do to reduce logging further. A simple and particularly drastic option is:
+Your traffic is not logged on the server, but if you're feeling especially paranoid there are various things you could do to reduce logging further. A simple and somewhat drastic option (once you've got everything working) is:
 
     sudo rm /var/log/syslog && sudo ln -s /dev/null /var/log/syslog
     sudo rm /var/log/auth.log && sudo ln -s /dev/null /var/log/auth.log
