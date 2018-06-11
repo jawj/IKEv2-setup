@@ -82,7 +82,7 @@ apt-get install -y language-pack-en strongswan libstrongswan-standard-plugins st
 
 
 ETH0ORSIMILAR=$(ip route get 8.8.8.8 | awk -- '{printf $5}')
-IP=$(ifdata -pa $ETH0ORSIMILAR)
+IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
 
 echo
 echo "Network interface: ${ETH0ORSIMILAR}"
