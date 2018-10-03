@@ -66,17 +66,17 @@ If things don't work out right away ...
 
 * If you get the following errors while installing:
 
-    Unable to locate package moreutils
-    Unable to locate package iptables-persistent
-    Unable to locate package certbot
+      Unable to locate package moreutils
+      Unable to locate package iptables-persistent
+      Unable to locate package certbot
 
   Run the following commands then retry:
   
-    sudo add-apt-repository main
-    sudo add-apt-repository universe
-    sudo add-apt-repository multiverse
-    sudo add-apt-repository restricted
-    sudo apt-get update
+      sudo add-apt-repository main
+      sudo add-apt-repository universe
+      sudo add-apt-repository multiverse
+      sudo add-apt-repository restricted
+      sudo apt-get update
     
 ### Users
 
