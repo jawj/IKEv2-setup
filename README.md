@@ -63,7 +63,21 @@ If things don't work out right away ...
   * __On the client:__  On a Mac, open Console.app in /Applications/Utilities. If connecting from an iPhone, plug the iPhone into the Mac. Pick the relevant device (in the bar down the left), and filter the output (in the box at top right) to `nesession`, and try to connect. (On Windows or Linux I don't know where you find the logs — if _you_ know, feel free to write the explanation and send a pull request).
   
 * The setup script is now idempotent — you can run it repeatedly with no ill effects — so, when you've fixed any issues, simply run it again.
+
+* If you get the following errors while installing:
+
+    Unable to locate package moreutils
+    Unable to locate package iptables-persistent
+    Unable to locate package certbot
+
+  Run the following commands then retry:
   
+    sudo add-apt-repository main
+    sudo add-apt-repository universe
+    sudo add-apt-repository multiverse
+    sudo add-apt-repository restricted
+    sudo apt-get update
+    
 ### Users
 
 To add or change VPN users, it's:
