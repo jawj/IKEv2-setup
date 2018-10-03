@@ -70,14 +70,13 @@ If things don't work out right away ...
       Unable to locate package iptables-persistent
       Unable to locate package certbot
 
-  Run the following commands, then try running ./setup.sh again:
+  Run the following commands, then try running ./setup.sh again.
   
-      sudo add-apt-repository main
-      sudo add-apt-repository universe
-      sudo add-apt-repository multiverse
-      sudo add-apt-repository restricted
+      sudo add-apt-repository {universe,restricted,multiverse}
       sudo apt-get update
     
+  This occurs because those repositories are not enabled by default in Ubuntu Server 18.04.
+  
 ### Users
 
 To add or change VPN users, it's:
