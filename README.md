@@ -70,7 +70,7 @@ If things don't work out right away ...
       Unable to locate package iptables-persistent
       Unable to locate package certbot
 
-  Run the following commands then try running ./setup.sh again:
+  Run the following commands, then try running ./setup.sh again:
   
       sudo add-apt-repository main
       sudo add-apt-repository universe
