@@ -73,6 +73,12 @@ echo "--- Updating and installing software ---"
 echo
 
 export DEBIAN_FRONTEND=noninteractive
+
+# see https://github.com/jawj/IKEv2-setup/issues/66 and https://bugs.launchpad.net/subiquity/+bug/1783129
+add-apt-repository universe
+add-apt-repository restricted
+add-apt-repository multiverse
+
 apt-get -o Acquire::ForceIPv4=true update && apt-get upgrade -y
 
 debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
