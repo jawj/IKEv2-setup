@@ -46,14 +46,14 @@ Configuration files, scripts and instructions are sent by email. They are also d
 
 * Start with a clean Ubuntu 18.04 Server installation.
 
-* Pick a domain name for the VPN server and **ensure that it already resolves to the correct IP** by creating the appropriate A record in the DNS and making sure it has propagated. _Let's Encrypt_ needs this in order to create your server certificate.
+* Pick a domain name for the VPN server and **ensure that it already resolves to the correct IP** by creating the appropriate A record in the DNS and making sure it has propagated. _Let's Encrypt_ needs this in order to create your server certificate. Ephemeral default domain names like `ec2-34-267-212-76.compute-1.amazonaws.com` [will not processed by Let's Entrypt](https://community.letsencrypt.org/t/policy-forbids-issuing-for-name-on-amazon-ec2-domain/12692) - on AWS you can create your free subdomain in Route53.
 
 * Download the script and give it execute permissions:
 
       wget https://raw.githubusercontent.com/jawj/IKEv2-setup/master/setup.sh
       chmod u+x setup.sh
     
-* Run `./setup.sh` as root and you'll be prompted to enter all the necessary details. **You *must* use a strong password** or passphrase for the login user, or your server *will* be compromised. 
+* Run `./setup.sh` as root and you'll be prompted to enter all the necessary details. **You *must* use a strong password** or passphrase for the login user, or your server *will* be compromised.
 
 ### Troubleshooting
 
