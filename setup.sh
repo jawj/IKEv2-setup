@@ -214,9 +214,9 @@ net.ipv6.conf.lo.disable_ipv6 = 1
 
 sysctl -p
 
-# these ike and esp settings are tested on Mac 10.12, iOS 10 and Windows 10
-# iOS/Mac with appropriate configuration profiles use AES_GCM_16_256/PRF_HMAC_SHA2_256/ECP_521 
-# Windows 10 uses AES_CBC_256/HMAC_SHA2_256_128/PRF_HMAC_SHA2_256/ECP_384 
+# these ike and esp settings are tested on Mac 10.14, iOS 12 and Windows 10
+# iOS and Mac with appropriate configuration profiles use AES_GCM_16_256/PRF_HMAC_SHA2_384/ECP_521 
+# Windows 10 uses AES_GCM_16_256/PRF_HMAC_SHA2_384/ECP_384
 
 echo "config setup
   strictcrlpolicy=yes
@@ -229,8 +229,8 @@ conn roadwarrior
   keyexchange=ikev2
   fragmentation=yes
   forceencaps=yes
-  ike=aes256gcm16-sha256-ecp521,aes256-sha256-ecp384!
-  esp=aes256gcm16-sha256,aes256gcm16-ecp384!
+  ike=aes256gcm16-prfsha384-ecp521,aes256gcm16-prfsha384-ecp384!
+  esp=aes256gcm16-ecp521,aes256gcm16-ecp384!
   dpdaction=clear
   dpddelay=180s
   rekey=no
@@ -345,7 +345,7 @@ cat << EOF > vpn-ios-or-mac.mobileconfig
           <key>EncryptionAlgorithm</key>
           <string>AES-256-GCM</string>
           <key>IntegrityAlgorithm</key>
-          <string>SHA2-256</string>
+          <string>SHA2-384</string>
           <key>DiffieHellmanGroup</key>
           <integer>21</integer>
           <key>LifeTimeInMinutes</key>
@@ -368,14 +368,12 @@ cat << EOF > vpn-ios-or-mac.mobileconfig
           <key>EncryptionAlgorithm</key>
           <string>AES-256-GCM</string>
           <key>IntegrityAlgorithm</key>
-          <string>SHA2-256</string>
+          <string>SHA2-384</string>
           <key>DiffieHellmanGroup</key>
           <integer>21</integer>
           <key>LifeTimeInMinutes</key>
           <integer>1440</integer>
         </dict>
-        <key>LocalIdentifier</key>
-        <string>${VPNHOST}</string>
         <key>OnDemandEnabled</key>
         <integer>1</integer>
         <key>OnDemandRules</key>
@@ -465,8 +463,8 @@ conn ikev2vpn
         rekeymargin=3m
         keyingtries=1
         keyexchange=ikev2
-        ike=aes256gcm16-sha256-ecp521!
-        esp=aes256gcm16-sha256!
+        ike=aes256gcm16-prfsha384-ecp521!
+        esp=aes256gcm16-ecp521!
         leftsourceip=%config
         leftauth=eap-mschapv2
         eap_identity=\${VPNUSERNAME}
@@ -521,8 +519,8 @@ Add-VpnConnection -Name "${VPNHOST}" \`
 Set-VpnConnectionIPsecConfiguration -ConnectionName "${VPNHOST}" \`
   -AuthenticationTransformConstants GCMAES256 \`
   -CipherTransformConstants GCMAES256 \`
-  -EncryptionMethod AES256 \`
-  -IntegrityCheckMethod SHA256 \`
+  -EncryptionMethod GCMAES256 \`
+  -IntegrityCheckMethod SHA384 \`
   -DHGroup ECP384 \`
   -PfsGroup ECP384 \`
   -Force
