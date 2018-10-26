@@ -87,9 +87,9 @@ To exit nano it's `Ctrl + O` then `Ctrl + X`, and to have strongSwan pick up the
 
 ### Upgrades
 
-If you're on a pre-18.04 version of Ubuntu, it's probably easiest to make a record of any changes to `ipsec.secrets`, blow the whole thing away and reinstall.
+If you're on a pre-18.04 version of Ubuntu, it's probably easiest to make a record of any changes to `ipsec.secrets`, blow the whole thing away and reinstall, then reinstate `ipsec.secrets`.
 
-If you're upgrading anyway, and you previously set this up on Ubuntu 16.10, you will need to manually amend the `ike`, `esp`, and `uniqueids` directives in `/etc/ipsec.conf` to reflect the current values in `setup.sh` after upgrading to 17.04+. The versions of strongSwan in 17.04+ don't like different sorts of ciphers being smooshed together, and `uniqueids=no` now seems to give problems trying to connect from two different devices with the same user name. You will also need to recreate any Windows 10 VPNs using the provided PowerShell commands, since the less secure ciphers supported by GUI-created Windows VPNs are no longer enabled.
+Note that you may also need to delete and recreate all your client connection settings using the updated PowerShell commands or .mobileconfig file, since there have been a few cipher changes over time. 
 
 ### Bonus paranoia
 
