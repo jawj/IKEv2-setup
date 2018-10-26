@@ -542,7 +542,7 @@ A bash script to set up strongSwan as a VPN client is attached as vpn-ubuntu-cli
 
 EOF
 
-cat vpn-instructions.txt | EMAIL=$USER@$VPNHOST mutt -s "VPN configuration" -a vpn-ios-or-mac.mobileconfig vpn-ubuntu-client.sh -- $EMAILADDR
+EMAIL=$USER@$VPNHOST mutt -s "VPN configuration" -a vpn-ios-or-mac.mobileconfig vpn-ubuntu-client.sh -- $EMAILADDR < vpn-instructions.txt
 
 echo
 echo "--- How to connect ---"
