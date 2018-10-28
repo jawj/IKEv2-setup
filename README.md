@@ -22,7 +22,7 @@ A Bash script that takes Ubuntu Server 18.04 LTS from clean install to productio
 
 * The VPN server identifies itself with a _Let's Encrypt_ certificate, so there's no need for clients to install private certificates — they can simply authenticate with username and strong password (EAP-MSCHAPv2).
 * The box is firewalled with `iptables` and configured for unattended security upgrades, and the _Let's Encrypt_ certificate is set up to auto-renew, so it _should_ be safe to forget about it all until 18.04 reaches end-of-life in 2023.
-* The cheapest VPSs offered by Linode, OVH, vps.ag and Vultr, and Scaleway's ARM64-2GB, have all been tested working as VPN servers. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
+* The cheapest VPSs offered by Linode, OVH, vps.ag, Hetzner and Vultr, and Scaleway's ARM64-2GB, have all been tested working as VPN servers. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
 
 ### VPN clients
 
@@ -46,7 +46,9 @@ Configuration files, scripts and instructions are sent by email. They are also d
 
 * Start with a clean Ubuntu 18.04 Server installation.
 
-* Pick a domain name for the VPN server and **ensure that it already resolves to the correct IP** by creating the appropriate A record in the DNS and making sure it has propagated. _Let's Encrypt_ needs this in order to create your server certificate.
+* _Either:_ Pick a domain name for the VPN server and **ensure that it already resolves to the correct IP** by creating the appropriate A record in the DNS and making sure it has propagated. _Let's Encrypt_ needs this in order to create your server certificate.
+
+* _Or:_ Choose to rely on an automatic DNS name from [sslip.io](https://sslip.io/) of the form _nnn.nnn.nnn.nnn.sslip.io_, which will be used automatically if you omit to enter a hostname when prompted by the script.
 
 * Download the script and give it execute permissions:
 
