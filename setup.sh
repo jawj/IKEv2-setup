@@ -21,14 +21,49 @@ function exit_badly {
 [[ $(lsb_release -rs) == "18.04" ]] || exit_badly "This script is for Ubuntu 18.04 only, aborting (if you know what you're doing, delete this check)."
 [[ $(id -u) -eq 0 ]] || exit_badly "Please re-run as root (e.g. sudo ./path/to/this/script)"
 
+echo "--- Updating and installing software ---"
+echo
+
+export DEBIAN_FRONTEND=noninteractive
+
+# see https://github.com/jawj/IKEv2-setup/issues/66 and https://bugs.launchpad.net/subiquity/+bug/1783129
+add-apt-repository universe
+add-apt-repository restricted
+add-apt-repository multiverse
+
+apt-get -o Acquire::ForceIPv4=true update && apt-get --with-new-pkgs upgrade -y
+apt autoremove -y
+
+debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
+debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
+
+apt-get install -y language-pack-en strongswan libstrongswan-standard-plugins strongswan-libcharon libcharon-standard-plugins libcharon-extra-plugins moreutils iptables-persistent postfix mutt unattended-upgrades certbot
+
+
+echo
 echo "--- Configuration: VPN settings ---"
 echo
 
+ETH0ORSIMILAR=$(ip route get 8.8.8.8 | awk -- '{printf $5}')
+IP=$(ifdata -pa $ETH0ORSIMILAR)
+DEFAULTVPNHOST=${IP}.sslip.io
+
+echo "Network interface: ${ETH0ORSIMILAR}"
+echo "External IP: ${IP}"
+echo
 echo "** Note: hostname must resolve to this machine already, to enable Let's Encrypt certificate setup **"
-read -p "Hostname for VPN (e.g. vpn.example.com): " VPNHOST
+
+read -p "Hostname for VPN (default: ${DEFAULTVPNHOST}): " VPNHOST
+VPNHOST=${VPNHOST:-$DEFAULTVPNHOST}
 
 VPNHOSTIP=$(dig -4 +short "$VPNHOST")
 [[ -n "$VPNHOSTIP" ]] || exit_badly "Cannot resolve VPN hostname, aborting"
+
+if [[ "$IP" != "$VPNHOSTIP" ]]; then
+  echo "Warning: $VPNHOST resolves to $VPNHOSTIP, not $IP"
+  echo "Either you are behind NAT, or something is wrong (e.g. hostname points to wrong IP, CloudFlare proxying shenanigans, ...)"
+  read -p "Press [Return] to continue, or Ctrl-C to abort" DUMMYVAR
+fi
 
 read -p "VPN username: " VPNUSERNAME
 while true; do
@@ -64,41 +99,8 @@ while true; do
   echo "Passwords didn't match -- please try again"
 done
 
-
 VPNIPPOOL="10.10.10.0/24"
 
-
-echo
-echo "--- Updating and installing software ---"
-echo
-
-export DEBIAN_FRONTEND=noninteractive
-
-# see https://github.com/jawj/IKEv2-setup/issues/66 and https://bugs.launchpad.net/subiquity/+bug/1783129
-add-apt-repository universe
-add-apt-repository restricted
-add-apt-repository multiverse
-
-apt-get -o Acquire::ForceIPv4=true update && apt-get upgrade -y
-
-debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
-debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
-
-apt-get install -y language-pack-en strongswan libstrongswan-standard-plugins strongswan-libcharon libcharon-standard-plugins libcharon-extra-plugins moreutils iptables-persistent postfix mutt unattended-upgrades certbot
-
-
-ETH0ORSIMILAR=$(ip route get 8.8.8.8 | awk -- '{printf $5}')
-IP=$(ifdata -pa $ETH0ORSIMILAR)
-
-echo
-echo "Network interface: ${ETH0ORSIMILAR}"
-echo "External IP: ${IP}"
-
-if [[ "$IP" != "$VPNHOSTIP" ]]; then
-  echo "Warning: $VPNHOST resolves to $VPNHOSTIP, not $IP"
-  echo "Either you are behind NAT, or something is wrong (e.g. hostname points to wrong IP, CloudFlare proxying shenanigans, ...)"
-  read -p "Press [Return] to continue, or Ctrl-C to abort" DUMMYVAR
-fi
 
 echo
 echo "--- Configuring firewall ---"
