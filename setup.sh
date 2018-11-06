@@ -26,12 +26,15 @@ echo
 
 export DEBIAN_FRONTEND=noninteractive
 
+#software-properties-common is required for add-apt-repository
+apt-get -o Acquire::ForceIPv4=true update && apt-get install -y software-properties-common
+
 # see https://github.com/jawj/IKEv2-setup/issues/66 and https://bugs.launchpad.net/subiquity/+bug/1783129
 add-apt-repository universe
 add-apt-repository restricted
 add-apt-repository multiverse
 
-apt-get -o Acquire::ForceIPv4=true update && apt-get --with-new-pkgs upgrade -y
+apt-get --with-new-pkgs upgrade -y
 apt autoremove -y
 
 debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
