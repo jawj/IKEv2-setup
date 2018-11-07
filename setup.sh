@@ -527,6 +527,11 @@ Set-VpnConnectionIPsecConfiguration -ConnectionName "${VPNHOST}" \`
   -PfsGroup ECP384 \`
   -Force
 
+# Run the following command to retain access to the local network (e.g. printers, file servers) while the VPN is connected.
+# On a home network, you probably want this. On a public network, you probably don't.
+
+Set-VpnConnection -Name "${VPNHOST}" -SplitTunneling \$True
+
 
 == Android ==
 
