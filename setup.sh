@@ -27,17 +27,20 @@ echo
 export DEBIAN_FRONTEND=noninteractive
 
 # see https://github.com/jawj/IKEv2-setup/issues/66 and https://bugs.launchpad.net/subiquity/+bug/1783129
+# note: software-properties-common is required for add-apt-repository
+apt-get -o Acquire::ForceIPv4=true update
+apt-get -o Acquire::ForceIPv4=true install -y software-properties-common
 add-apt-repository universe
 add-apt-repository restricted
 add-apt-repository multiverse
 
-apt-get -o Acquire::ForceIPv4=true update && apt-get --with-new-pkgs upgrade -y
+apt-get -o Acquire::ForceIPv4=true --with-new-pkgs upgrade -y
 apt autoremove -y
 
 debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
 
-apt-get install -y language-pack-en strongswan libstrongswan-standard-plugins strongswan-libcharon libcharon-standard-plugins libcharon-extra-plugins moreutils iptables-persistent postfix mutt unattended-upgrades certbot
+apt-get -o Acquire::ForceIPv4=true install -y language-pack-en strongswan libstrongswan-standard-plugins strongswan-libcharon libcharon-standard-plugins libcharon-extra-plugins moreutils iptables-persistent postfix mutt unattended-upgrades certbot
 
 
 echo
@@ -71,7 +74,7 @@ read -s -p "VPN password (no quotes, please): " VPNPASSWORD
 echo
 read -s -p "Confirm VPN password: " VPNPASSWORD2
 echo
-[ "$VPNPASSWORD" = "$VPNPASSWORD2" ] && break
+[[ "$VPNPASSWORD" = "$VPNPASSWORD2" ]] && break
 echo "Passwords didn't match -- please try again"
 done
 
@@ -84,22 +87,32 @@ TZONE=${TZONE:-'Europe/London'}
 
 read -p "Email address for sysadmin (e.g. j.bloggs@example.com): " EMAILADDR
 
-echo
-
 read -p "SSH log-in port (default: 22): " SSHPORT
 SSHPORT=${SSHPORT:-22}
 
 read -p "SSH log-in username: " LOGINUSERNAME
+
+CERTLOGIN="n"
+if [[ -s /root/.ssh/authorized_keys ]]; then
+  while true; do
+    read -p "Copy /root/.ssh/authorized_keys to new user and disable SSH password log-in [Y/n]? " CERTLOGIN
+    [[ ${CERTLOGIN,,} =~ ^(y(es)?)?$ ]] && CERTLOGIN=y
+    [[ ${CERTLOGIN,,} =~ ^no?$ ]] && CERTLOGIN=n
+    [[ $CERTLOGIN =~ ^(y|n)$ ]] && break
+  done
+fi
+
 while true; do
-  read -s -p "SSH log-in password (must be REALLY STRONG): " LOGINPASSWORD
+  [[ $CERTLOGIN = "y" ]] && read -s -p "SSH user's password: " LOGINPASSWORD
+  [[ $CERTLOGIN != "y" ]] && read -s -p "SSH user's log-in password (must be REALLY STRONG): " LOGINPASSWORD
   echo
-  read -s -p "Confirm SSH log-in password: " LOGINPASSWORD2
+  read -s -p "Confirm SSH user's password: " LOGINPASSWORD2
   echo
-  [ "$LOGINPASSWORD" = "$LOGINPASSWORD2" ] && break
+  [[ "$LOGINPASSWORD" = "$LOGINPASSWORD2" ]] && break
   echo "Passwords didn't match -- please try again"
 done
 
-VPNIPPOOL="10.10.10.0/24"
+VPNIPPOOL="10.10.0.0/16"
 
 
 echo
@@ -234,7 +247,7 @@ conn roadwarrior
   ike=aes256gcm16-prfsha384-ecp521,aes256gcm16-prfsha384-ecp384!
   esp=aes256gcm16-ecp521,aes256gcm16-ecp384!
   dpdaction=clear
-  dpddelay=180s
+  dpddelay=900s
   rekey=no
   left=%any
   leftid=@${VPNHOST}
@@ -255,7 +268,6 @@ ${VPNUSERNAME} : EAP \""${VPNPASSWORD}"\"
 " > /etc/ipsec.secrets
 
 ipsec restart
-
 
 
 echo
@@ -281,6 +293,20 @@ grep -Fq 'jawj/IKEv2-setup' /etc/ssh/sshd_config || echo "
 MaxStartups 1
 MaxAuthTries 2
 UseDNS no" >> /etc/ssh/sshd_config
+
+if [[ $CERTLOGIN = "y" ]]; then
+  mkdir -p /home/${LOGINUSERNAME}/.ssh
+  chown $LOGINUSERNAME /home/${LOGINUSERNAME}/.ssh
+  chmod 700 /home/${LOGINUSERNAME}/.ssh
+
+  cp /root/.ssh/authorized_keys /home/${LOGINUSERNAME}/.ssh/authorized_keys
+  chown $LOGINUSERNAME /home/${LOGINUSERNAME}/.ssh/authorized_keys
+  chmod 600 /home/${LOGINUSERNAME}/.ssh/authorized_keys
+
+  sed -r \
+  -e "s/^#?PasswordAuthentication yes$/PasswordAuthentication no/" \
+  -i.allows_pwd /etc/ssh/sshd_config
+fi
 
 service ssh restart
 
