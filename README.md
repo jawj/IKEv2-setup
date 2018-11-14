@@ -44,18 +44,28 @@ Configuration files, scripts and instructions are sent by email. They are also d
 
 ## How?
 
-* Start with a clean Ubuntu 18.04 Server installation.
-
 * _Either:_ Pick a domain name for the VPN server and **ensure that it already resolves to the correct IP** by creating the appropriate A record in the DNS and making sure it has propagated. _Let's Encrypt_ needs this in order to create your server certificate.
 
-* _Or:_ Choose to rely on an automatic DNS name from [sslip.io](https://sslip.io/) of the form _nnn.nnn.nnn.nnn.sslip.io_, which will be used automatically if you omit to enter a hostname when prompted by the script.
+    _Or:_ Choose to rely on an automatic DNS name from [sslip.io](https://sslip.io/) of the form _nnn.nnn.nnn.nnn.sslip.io_, which will be used automatically if you omit to enter a hostname when prompted by the script.
 
-* Download the script and give it execute permissions:
+* Start with a clean Ubuntu 18.04 Server installation.
+
+* Optionally, set up [key-based SSH authentication](https://help.ubuntu.com/community/SSH/OpenSSH/Keys) (alternatively, this may have been handled automatically by your server provider, or you may choose to stick with password-based authentication). This may require you to run some or all of the following commands, with appropriate substitutions, on the machine you're going to be logging in from:
+
+      ssh-keygen -t ed25519 -C "me@my-domain.tld"      # if you need a new key, ed25519 is the latest and possibly most secure option
+      ssh-keygen -t rsa -b 4096 -C "me@my-domain.tld"  # alternatively, use RSA and go (4,096 bits) large
+
+      ssh root@myvpn.example.net  # if your host forces a password change before anything else (e.g. Hetzner), do it now, then exit
+      ssh-copy-id -i ~/.ssh/id_ed25519 root@myvpn.example.net  # copy your public key over to the VPN server
+      ssh root@myvpn.example.net  # log back in to the server for the next step ...
+
+* On your new server installation, become `root`, download the script, give it execute permissions, and run it:
 
       wget https://raw.githubusercontent.com/jawj/IKEv2-setup/master/setup.sh
       chmod u+x setup.sh
+      ./setup.sh
     
-* Run `./setup.sh` as root and you'll be prompted to enter all the necessary details. **You *must* use a strong password** or passphrase for the login user, or your server *will* be compromised. 
+* You'll be prompted to enter all the necessary details. If you are not using key-based SSH authentication, **you *must* pick a really strong password** for the login user when prompted, or your server *will* be compromised. 
 
 ### Troubleshooting
 
