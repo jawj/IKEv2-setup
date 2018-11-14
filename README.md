@@ -65,7 +65,31 @@ Configuration files, scripts and instructions are sent by email. They are also d
       chmod u+x setup.sh
       ./setup.sh
     
-* You'll be prompted to enter all the necessary details. If you are not using key-based SSH authentication, **you *must* pick a really strong password** for the login user when prompted, or your server *will* be compromised. 
+* You'll be prompted to enter all the necessary details after the software updates and installations complete. If you are not using key-based SSH authentication, **you *must* pick a really strong password** for the login user when prompted, or your server *will* be compromised. 
+
+    The part of your session where the script asks you questions should look something like this:
+    
+        --- Configuration: VPN settings ---
+
+        Network interface: eth0
+        External IP: 100.100.100.100
+
+        ** Note: hostname must resolve to this machine already, to enable Let's Encrypt certificate setup **
+        Hostname for VPN (default: 100.100.100.100.sslip.io): 
+        VPN username: george
+        VPN password (no quotes, please): 
+        Confirm VPN password: 
+
+        --- Configuration: general server settings ---
+
+        Timezone (default: Europe/London): 
+        Email address for sysadmin (e.g. j.bloggs@example.com): me@my-domain.tld
+        SSH log-in port (default: 22): 2222
+        SSH log-in username: george
+        Copy /root/.ssh/authorized_keys to new user and disable SSH password log-in [Y/n]? y
+        SSH user's password: 
+        Confirm SSH user's password: 
+
 
 ### Troubleshooting
 
