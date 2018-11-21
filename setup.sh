@@ -87,10 +87,10 @@ TZONE=${TZONE:-'Europe/London'}
 
 read -p "Email address for sysadmin (e.g. j.bloggs@example.com): " EMAILADDR
 
-read -p "SSH log-in port (default: 22): " SSHPORT
+read -p "Desired SSH log-in port (default: 22): " SSHPORT
 SSHPORT=${SSHPORT:-22}
 
-read -p "SSH log-in username: " LOGINUSERNAME
+read -p "New SSH log-in user name: " LOGINUSERNAME
 
 CERTLOGIN="n"
 if [[ -s /root/.ssh/authorized_keys ]]; then
@@ -103,10 +103,10 @@ if [[ -s /root/.ssh/authorized_keys ]]; then
 fi
 
 while true; do
-  [[ $CERTLOGIN = "y" ]] && read -s -p "SSH user's password: " LOGINPASSWORD
-  [[ $CERTLOGIN != "y" ]] && read -s -p "SSH user's log-in password (must be REALLY STRONG): " LOGINPASSWORD
+  [[ $CERTLOGIN = "y" ]] && read -s -p "New SSH user's password (e.g. for sudo): " LOGINPASSWORD
+  [[ $CERTLOGIN != "y" ]] && read -s -p "New SSH user's log-in password (must be REALLY STRONG): " LOGINPASSWORD
   echo
-  read -s -p "Confirm SSH user's password: " LOGINPASSWORD2
+  read -s -p "Confirm new SSH user's password: " LOGINPASSWORD2
   echo
   [[ "$LOGINPASSWORD" = "$LOGINPASSWORD2" ]] && break
   echo "Passwords didn't match -- please try again"
