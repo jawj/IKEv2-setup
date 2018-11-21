@@ -1,13 +1,8 @@
 #!/bin/bash -e
 
-# == Update to 18.04 if required:
-# apt-get update
-# do-release-upgrade
-
-# == Then run this script
-# wget https://raw.githubusercontent.com/jawj/IKEv2-setup/master/setup.sh
-# chmod u+x setup.sh
-# ./setup.sh
+# github.com/jawj/IKEv2-setup
+# Copyright (c) 2015 – 2018 George MacKerron
+# Released under the MIT licence: http://opensource.org/licenses/mit-license
 
 echo
 echo "=== https://github.com/jawj/IKEv2-setup ==="
