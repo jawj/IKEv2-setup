@@ -21,8 +21,7 @@ A Bash script that takes Ubuntu Server 18.04 LTS from clean install to productio
 ### VPN server
 
 * The VPN server identifies itself with a _Let's Encrypt_ certificate, so there's no need for clients to install private certificates — they can simply authenticate with username and strong password (EAP-MSCHAPv2).
-* The box is firewalled with `iptables` and configured for unattended security upgrades, and the _Let's Encrypt_ certificate is set up to auto-renew, so it _could_ be safe to forget about it all until 18.04 reaches end-of-life in 2023. (Note that `iptables` setup includes [basic rate-limiting](https://debian-administration.org/article/187/Using_iptables_to_rate-limit_incoming_connections), dropping new connections if there have been 60+ connection attempts in the last 5 minutes)
-* The cheapest VPSs offered by Linode, OVH, vps.ag, Hetzner and Vultr, and Scaleway's ARM64-2GB, have all been tested working as VPN servers. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
+* The box is firewalled with `iptables` and configured for unattended security upgrades, and the _Let's Encrypt_ certificate is set up to auto-renew, so it _could_ be safe to forget about it all until 18.04 reaches end-of-life in 2023. (Note that `iptables` setup includes [basic rate-limiting](https://debian-administration.org/article/187/Using_iptables_to_rate-limit_incoming_connections), dropping new connections if there have been 60+ connection attempts in the last 5 minutes).
 
 ### VPN clients
 
@@ -44,28 +43,28 @@ Configuration files, scripts and instructions are sent by email. They are also d
 
 ## How?
 
-* _Either:_ Pick a domain name for the VPN server and **ensure that it already resolves to the correct IP** by creating the appropriate A record in the DNS and making sure it has propagated. _Let's Encrypt_ needs this in order to create your server certificate.
+1. _Either:_ Pick a domain name for the VPN server and **ensure that it already resolves to the correct IP** by creating the appropriate A record in the DNS and making sure it has propagated. _Let's Encrypt_ needs this in order to create your server certificate.
 
     _Or:_ Choose to rely on an automatic DNS name from [sslip.io](https://sslip.io/) of the form _nnn.nnn.nnn.nnn.sslip.io_, which will be used automatically if you omit to enter a hostname when prompted by the script.
 
-* Start with a clean Ubuntu 18.04 Server installation.
+2. Start with a clean Ubuntu 18.04 Server installation. The cheapest VPSs offered by Linode, OVH, vps.ag, Hetzner and Vultr, and Scaleway's ARM64-2GB, have all been tested working. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr, port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
 
-* Optionally, set up [key-based SSH authentication](https://help.ubuntu.com/community/SSH/OpenSSH/Keys) (alternatively, this may have been handled automatically by your server provider, or you may choose to stick with password-based authentication). This may require you to run some or all of the following commands, with appropriate substitutions, on the machine you're going to be logging in from:
+3. Optionally, set up [key-based SSH authentication](https://help.ubuntu.com/community/SSH/OpenSSH/Keys) (alternatively, this may have been handled automatically by your server provider, or you may choose to stick with password-based authentication). This may require you to run some or all of the following commands, with appropriate substitutions, on the machine you're going to be logging in from:
 
-      ssh-keygen -t ed25519 -C "me@my-domain.tld"      # if you need a new key, ed25519 is the latest and possibly most secure option
-      ssh-keygen -t rsa -b 4096 -C "me@my-domain.tld"  # alternatively, use RSA and go (4,096 bits) large
+       ssh-keygen -t ed25519 -C "me@my-domain.tld"      # if you need a new key, ed25519 is the latest and possibly most secure option
+       ssh-keygen -t rsa -b 4096 -C "me@my-domain.tld"  # alternatively, use RSA and go (4,096 bits) large
 
-      ssh root@myvpn.example.net  # if your host forces a password change before anything else (e.g. Hetzner), do it now, then exit
-      ssh-copy-id -i ~/.ssh/id_ed25519 root@myvpn.example.net  # copy your public key over to the VPN server
-      ssh root@myvpn.example.net  # log back in to the server for the next step ...
+       ssh root@myvpn.example.net  # if your host forces a password change before anything else (e.g. Hetzner), do it now, then exit
+       ssh-copy-id -i ~/.ssh/id_ed25519 root@myvpn.example.net  # copy your public key over to the VPN server
+       ssh root@myvpn.example.net  # log back in to the server for the next step ...
 
-* On your new server installation, become `root`, download the script, give it execute permissions, and run it:
+4. On your new server installation, become `root`, download the script, give it execute permissions, and run it:
 
-      wget https://raw.githubusercontent.com/jawj/IKEv2-setup/master/setup.sh
-      chmod u+x setup.sh
-      ./setup.sh
+       wget https://raw.githubusercontent.com/jawj/IKEv2-setup/master/setup.sh
+       chmod u+x setup.sh
+       ./setup.sh
     
-* You'll be prompted to enter all the necessary details after the software updates and installations complete. If you are not using key-based SSH authentication, **you *must* pick a really strong password** for the login user when prompted, or your server *will* be compromised. 
+5. You'll be prompted to enter all the necessary details after the software updates and installations complete. If you are not using key-based SSH authentication, **you *must* pick a really strong password** for the login user when prompted, or your server *will* be compromised. 
 
     The part of your session where the script asks you questions should look something like this:
     
@@ -80,15 +79,31 @@ Configuration files, scripts and instructions are sent by email. They are also d
         VPN password (no quotes, please): 
         Confirm VPN password: 
 
+        Public DNS servers include:
+
+        176.103.130.130,176.103.130.131  AdGuard               https://adguard.com/en/adguard-dns/overview.html
+        176.103.130.132,176.103.130.134  AdGuard Family        https://adguard.com/en/adguard-dns/overview.html
+        1.1.1.1,1.0.0.1                  Cloudflare/APNIC      https://1.1.1.1
+        84.200.69.80,84.200.70.40        DNS.WATCH             https://dns.watch
+        8.8.8.8,8.8.4.4                  Google                https://developers.google.com/speed/public-dns/
+        208.67.222.222,208.67.220.220    OpenDNS               https://www.opendns.com
+        208.67.222.123,208.67.220.123    OpenDNS FamilyShield  https://www.opendns.com
+        9.9.9.9,149.112.112.112          Quad9                 https://quad9.net
+        77.88.8.8,77.88.8.1              Yandex                https://dns.yandex.com
+        77.88.8.88,77.88.8.2             Yandex Safe           https://dns.yandex.com
+        77.88.8.7,77.88.8.3              Yandex Family         https://dns.yandex.com
+        
+        DNS servers for VPN users (default: 1.1.1.1,1.0.0.1): 176.103.130.130,176.103.130.131
+
         --- Configuration: general server settings ---
 
         Timezone (default: Europe/London): 
         Email address for sysadmin (e.g. j.bloggs@example.com): me@my-domain.tld
-        SSH log-in port (default: 22): 2222
-        SSH log-in username: george
+        Desired SSH log-in port (default: 22): 2222
+        New SSH log-in user name: george
         Copy /root/.ssh/authorized_keys to new user and disable SSH password log-in [Y/n]? y
-        SSH user's password: 
-        Confirm SSH user's password: 
+        New SSH user's password (e.g. for sudo): 
+        Confirm new SSH user's password: 
 
 
 ### Troubleshooting
