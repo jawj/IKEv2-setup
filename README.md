@@ -105,6 +105,12 @@ Configuration files, scripts and instructions are sent by email. They are also d
         New SSH user's password (e.g. for sudo): 
         Confirm new SSH user's password: 
 
+6. Once you're up and running, use these commands for some insight into what's going on:
+
+        sudo ipsec statusall           # status, who's connected, etc.
+        sudo iptables -L -v            # how much traffic has been forwarded, dropped, etc.?
+        sudo tail -f /var/log/syslog   # real-time logs of (dis)connections etc.
+        
 
 ### Troubleshooting
 
@@ -114,7 +120,7 @@ If things don't work out right away ...
 
 * Check the server logs on strongSwan startup and when you try to connect, and the client logs when you try to connect. 
 
-  * __On the server:__  Log in via SSH, then `sudo less +F /var/log/syslog`. To see startup logs, log in to another session and `sudo ipsec restart` there, then switch back. To see what's logged during a connection attempt, try to connect from a client. 
+  * __On the server:__  Log in via SSH, then `sudo tail -f /var/log/syslog`. To see startup logs, log in to another session and `sudo ipsec restart` there, then switch back. To see what's logged during a connection attempt, try to connect from a client. 
   
   * __On the client:__  On a Mac, open Console.app in /Applications/Utilities. If connecting from an iPhone, plug the iPhone into the Mac. Pick the relevant device (in the bar down the left), filter the output (in the box at top right) to `nesession`, and try to connect. (On Windows or Linux I don't know where you find the logs — if _you_ know, feel free to write the explanation and send a pull request).
   
