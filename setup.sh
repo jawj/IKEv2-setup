@@ -417,7 +417,7 @@ cat << EOF > vpn-ios-or-mac.mobileconfig
           <integer>1440</integer>
         </dict>
         <key>OnDemandEnabled</key>
-        <integer>1</integer>
+        <integer>0</integer>
         <key>OnDemandRules</key>
         <array>
           <dict>
