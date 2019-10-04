@@ -380,6 +380,10 @@ cat << EOF > vpn-ios-or-mac.mobileconfig
     <dict>
       <key>IKEv2</key>
       <dict>
+      	<key>AuthName</key>
+				<string>${VPNUSERNAME}</string>
+				<key>AuthPassword</key>
+				<string>${VPNPASSWORD}</string>
         <key>AuthenticationMethod</key>
         <string>None</string>
         <key>ChildSecurityAssociationParameters</key>
