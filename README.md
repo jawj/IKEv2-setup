@@ -169,3 +169,8 @@ We use a similar setup as a corporate VPN at [PSYT](http://psyt.co.uk). And I us
 * Robust to connection switching and interruptions via MOBIKE
 
 More on IKEv2 at https://www.cl.cam.ac.uk/~mas90/resources/strongswan/ and https://www.bestvpn.com/blog/4147/pptp-vs-l2tp-vs-openvpn-vs-sstp-vs-ikev2/
+
+### Why not Algo?
+
+Feel free to use [Algo](https://github.com/trailofbits/algo) instead. It has similar aims, and now configures [WireGuard](https://www.wireguard.com/) too. However, it has many more moving parts, and requires several local installation steps before you even start setting up your VPN. This script is intended to be much simpler.
+
