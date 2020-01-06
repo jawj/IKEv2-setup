@@ -21,31 +21,33 @@ A Bash script that takes Ubuntu Server 18.04 LTS from clean install to productio
 ### VPN server
 
 * The VPN server identifies itself with a _Let's Encrypt_ certificate, so there's no need for clients to install private certificates — they can simply authenticate with username and strong password (EAP-MSCHAPv2).
+* The only cipher set implemented is [CNSA/RFC 6379 Suite B](https://wiki.strongswan.org/projects/strongswan/wiki/IKEv2CipherSuites#Commercial-National-Security-Algorithm-CNSA-Suite-Suite-B-Cryptographic-Suites-for-IPsec-RFC-6379) with confidentiality/encryption.
+
 * The box is firewalled with `iptables` and configured for unattended security upgrades, and the _Let's Encrypt_ certificate is set up to auto-renew, so it _could_ be safe to forget about it all until 18.04 reaches end-of-life in 2023. (Note that `iptables` setup includes [basic rate-limiting](https://debian-administration.org/article/187/Using_iptables_to_rate-limit_incoming_connections), dropping new connections if there have been 60+ connection attempts in the last 5 minutes).
 
 ### VPN clients
 
 The VPN is tested working with:
 
-*  **macOS 10.12 – 10.14, iOS 10 – 12**  — Built-in clients. A `.mobileconfig` profile is generated for Mac and iOS, to set up secure ciphers and enable *Connect on demand* support.
+*  **macOS 10.12 – 10.15, iOS 10 – 13**  — Built-in clients. A `.mobileconfig` profile is generated for Mac and iOS, to set up secure ciphers and enable *Connect on demand* support.
 * **Windows 10 Pro** — Built-in client. PowerShell commands are generated to configure the VPN and secure ciphers.
 * **Ubuntu (17.04 and presumably others)** — Using strongSwan. A Bash script is generated to set this up.
-* **Android** — Using the strongSwan app.
+* **Android** — Using the official strongSwan app.
 
-Configuration files, scripts and instructions are sent by email. They are also dropped in the newly-created non-root user's home directory on the server (this point may be important, because VPS providers sometimes block traffic on port 25 by default, and conscientious email providers will sometimes mark a successfully sent email as spam).
+Configuration files, scripts and instructions are sent by email. They are also dropped in the newly-created non-root user's home directory on the server (this point may be important, because VPS providers sometimes block traffic on port 25 by default and, even if successfully sent, conscientious email hosts will sometimes mark the email as spam).
 
 ### Caveats
 
 * There's no IPv6 support — and, in fact, IPv6 networking is disabled — because supporting IPv6 prevents the use of `forceencaps`, and honestly also because I haven't got to grips with the security implications (`ip6tables` rules and so on).
 * The script **won't** work as-is on 16.04 LTS because the `certbot` package is outdated, found under the name `letsencrypt`, and doesn't renew certificates automatically.
-* Don't use this unmodified on a server you use for anything else, as it does as it sees fit with various wider settings that may conflict with what you're doing.
+* **Don't use this unmodified on a server you use for anything else**: it does as it sees fit with various wider settings that may conflict with what you're doing.
 
 
 ## How?
 
-1. _Either:_ Pick a domain name for the VPN server and **ensure that it already resolves to the correct IP** by creating the appropriate A record in the DNS and making sure it has propagated. _Let's Encrypt_ needs this in order to create your server certificate.
+1. Pick a domain name for the VPN server and **ensure that it already resolves to the correct IP** by creating the appropriate `A` record in the DNS and making sure it has propagated. _Let's Encrypt_ needs this in order to create your server certificate.
 
-    _Or:_ Choose to rely on an automatic DNS name from [sslip.io](https://sslip.io/) of the form _nnn.nnn.nnn.nnn.sslip.io_, which will be used automatically if you omit to enter a hostname when prompted by the script.
+_You may find an automatic DNS alias service helpful here (such as [sslip.io](https://sslip.io/), [xip.io](http://xip.io), [nip.io](https://nip.io), [s.test.cab](https://s.test.cab), [xip.lhjmmc.cn](https://xip.lhjmmc.cn/)). Earlier versions of this script even used an sslip.io address as a default option. However, you may also find that these services regularly fall foul of Let's Encrypt's per-domain rate limit of [50 certificates per week](https://letsencrypt.org/docs/rate-limits/)._
 
 2. Start with a clean Ubuntu 18.04 Server installation. The cheapest VPSs offered by Linode, OVH, vps.ag, Hetzner and Vultr, and Scaleway's ARM64-2GB, have all been tested working. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr, port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
 
@@ -74,7 +76,7 @@ Configuration files, scripts and instructions are sent by email. They are also d
         External IP: 100.100.100.100
 
         ** Note: hostname must resolve to this machine already, to enable Let's Encrypt certificate setup **
-        Hostname for VPN (default: 100.100.100.100.sslip.io): 
+        Hostname for VPN: 
         VPN username: george
         VPN password (no quotes, please): 
         Confirm VPN password: 
@@ -124,7 +126,7 @@ If things don't work out right away ...
   
   * __On the client:__  On a Mac, open Console.app in /Applications/Utilities. If connecting from an iPhone, plug the iPhone into the Mac. Pick the relevant device (in the bar down the left), filter the output (in the box at top right) to `nesession`, and try to connect. (On Windows or Linux I don't know where you find the logs — if _you_ know, feel free to write the explanation and send a pull request).
   
-* The setup script is now idempotent — you can run it repeatedly with no ill effects — so, when you've fixed any issues, simply run it again.
+* The setup script is now more or less idempotent — you should be able to run it repeatedly with no ill effects — so, when you've fixed any issues, simply run it again.
 
 * If you have a tricky question about strongSwan, it's probably better to [raise it with the strongSwan team](https://strongswan.org/support.html) than file an issue here.
   
@@ -162,7 +164,7 @@ We use a similar setup as a corporate VPN at [PSYT](http://psyt.co.uk). And I us
 ### Why IKEv2?
 
 * Fair security
-* Built-in clients for latest iOS, Mac and Windows (+ free install on Android)
+* Built-in clients for latest iOS, Mac and Windows (+ trustworthy free install on Android)
 * *Connect on demand* support on iOS and Mac
 * Robust to connection switching and interruptions via MOBIKE
 

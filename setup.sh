@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # github.com/jawj/IKEv2-setup
-# Copyright (c) 2015 – 2018 George MacKerron
+# Copyright (c) 2015 – 2020 George MacKerron
 # Released under the MIT licence: http://opensource.org/licenses/mit-license
 
 echo
@@ -13,7 +13,7 @@ function exit_badly {
   exit 1
 }
 
-[[ $(lsb_release -rs) == "18.04" ]] || exit_badly "This script is for Ubuntu 18.04 only, aborting (if you know what you're doing, delete this check)."
+[[ $(lsb_release -rs) == "18.04" ]] || exit_badly "This script is for Ubuntu 18.04 only: aborting (if you know what you're doing, try deleting this check)"
 [[ $(id -u) -eq 0 ]] || exit_badly "Please re-run as root (e.g. sudo ./path/to/this/script)"
 
 echo "--- Updating and installing software ---"
@@ -42,25 +42,22 @@ echo
 echo "--- Configuration: VPN settings ---"
 echo
 
-ETH0ORSIMILAR=$(ip route get 8.8.8.8 | awk -- '{printf $5}')
+ETH0ORSIMILAR=$(ip route get 1.1.1.1 | awk -- '{printf $5}')
 IP=$(ifdata -pa $ETH0ORSIMILAR)
-DEFAULTVPNHOST=${IP}.sslip.io
 
 echo "Network interface: ${ETH0ORSIMILAR}"
 echo "External IP: ${IP}"
 echo
-echo "** Note: hostname must resolve to this machine already, to enable Let's Encrypt certificate setup **"
-
-read -p "Hostname for VPN (default: ${DEFAULTVPNHOST}): " VPNHOST
-VPNHOST=${VPNHOST:-$DEFAULTVPNHOST}
+echo "** Note: this hostname must already resolve to this machine, to enable Let's Encrypt certificate setup **"
+read -p "Hostname for VPN: " VPNHOST
 
 VPNHOSTIP=$(dig -4 +short "$VPNHOST")
-[[ -n "$VPNHOSTIP" ]] || exit_badly "Cannot resolve VPN hostname, aborting"
+[[ -n "$VPNHOSTIP" ]] || exit_badly "Cannot resolve VPN hostname: aborting"
 
 if [[ "$IP" != "$VPNHOSTIP" ]]; then
   echo "Warning: $VPNHOST resolves to $VPNHOSTIP, not $IP"
-  echo "Either you are behind NAT, or something is wrong (e.g. hostname points to wrong IP, CloudFlare proxying shenanigans, ...)"
-  read -p "Press [Return] to continue, or Ctrl-C to abort" DUMMYVAR
+  echo "Either you're behind NAT, or something is wrong (e.g. hostname points to wrong IP, CloudFlare proxying shenanigans, ...)"
+  read -p "Press [Return] to continue anyway, or Ctrl-C to abort" DUMMYVAR
 fi
 
 read -p "VPN username: " VPNUSERNAME
@@ -243,9 +240,6 @@ net.ipv6.conf.lo.disable_ipv6 = 1
 
 sysctl -p
 
-# these ike and esp settings are tested on Mac 10.14, iOS 12 and Windows 10
-# iOS and Mac with appropriate configuration profiles use AES_GCM_16_256/PRF_HMAC_SHA2_384/ECP_521 
-# Windows 10 uses AES_GCM_16_256/PRF_HMAC_SHA2_384/ECP_384
 
 echo "config setup
   strictcrlpolicy=yes
@@ -258,8 +252,11 @@ conn roadwarrior
   keyexchange=ikev2
   fragmentation=yes
   forceencaps=yes
-  ike=aes256gcm16-prfsha384-ecp521,aes256gcm16-prfsha384-ecp384!
-  esp=aes256gcm16-ecp521,aes256gcm16-ecp384!
+
+  # CNSA/RFC 6379 Suite B (https://wiki.strongswan.org/projects/strongswan/wiki/IKEv2CipherSuites)
+  ike=aes256gcm16-prfsha384-ecp384!
+  esp=aes256gcm16-ecp384!
+
   dpdaction=clear
   dpddelay=900s
   rekey=no
@@ -389,7 +386,7 @@ cat << EOF > vpn-ios-or-mac.mobileconfig
           <key>IntegrityAlgorithm</key>
           <string>SHA2-384</string>
           <key>DiffieHellmanGroup</key>
-          <integer>21</integer>
+          <integer>20</integer>
           <key>LifeTimeInMinutes</key>
           <integer>1440</integer>
         </dict>
@@ -412,7 +409,7 @@ cat << EOF > vpn-ios-or-mac.mobileconfig
           <key>IntegrityAlgorithm</key>
           <string>SHA2-384</string>
           <key>DiffieHellmanGroup</key>
-          <integer>21</integer>
+          <integer>20</integer>
           <key>LifeTimeInMinutes</key>
           <integer>1440</integer>
         </dict>
@@ -505,8 +502,8 @@ conn ikev2vpn
         rekeymargin=3m
         keyingtries=1
         keyexchange=ikev2
-        ike=aes256gcm16-prfsha384-ecp521!
-        esp=aes256gcm16-ecp521!
+        ike=aes256gcm16-prfsha384-ecp384!
+        esp=aes256gcm16-ecp384!
         leftsourceip=%config
         leftauth=eap-mschapv2
         eap_identity=\${VPNUSERNAME}
@@ -537,7 +534,7 @@ if [[ "\$VPNIP" == "\$ACTUALIP" ]]; then echo "PASSED (IP: \${VPNIP})"; else ech
 
 echo
 echo "To disconnect: ipsec down ikev2vpn"
-echo "To resconnect: ipsec up ikev2vpn"
+echo "To reconnect:  ipsec up ikev2vpn"
 echo "To connect automatically: change auto=add to auto=start in /etc/ipsec.conf"
 EOF
 
