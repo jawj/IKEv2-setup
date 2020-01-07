@@ -43,7 +43,7 @@ echo "--- Configuration: VPN settings ---"
 echo
 
 ETH0ORSIMILAR=$(ip route get 1.1.1.1 | awk -- '{printf $5}')
-IP=$(ifdata -pa $ETH0ORSIMILAR)
+IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
 
 echo "Network interface: ${ETH0ORSIMILAR}"
 echo "External IP: ${IP}"
