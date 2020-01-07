@@ -118,7 +118,9 @@ Configuration files, scripts and instructions are sent by email. They are also d
 
 If things don't work out right away ...
 
-* Make sure you created the client connection using the emailed `.mobileconfig` file or PowerShell commands. Setting it up manually via the OS GUI will not work, since it will default to insecure ciphers which the server has not been configured to support.
+* Make sure you created the client connection using the newly emailed `.mobileconfig` file or PowerShell commands. Setting it up manually via the OS GUI will not work, since it will default to insecure ciphers which the server has not been configured to support. Also note that `.mobileconfig` files generated with earlier iterations of this script may no longer be compatible, since the configured ciphers have changed from time to time.
+
+* Check that network ingress for UDP on ports 500 and 4500 is enabled (on some cloud platforms you'll have to add appropriate firewall rules to your virtual network). Also check that packet forwarding is enabled (on some cloud platforms this is controlled by a configuration setting that's off by default).
 
 * Check the server logs on strongSwan startup and when you try to connect, and the client logs when you try to connect. 
 
