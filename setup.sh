@@ -539,7 +539,7 @@ ipsec statusall
 echo
 echo -n "Testing IP address ... "
 VPNIP=\$(dig -4 +short ${VPNHOST})
-ACTUALIP=\$(curl -s ifconfig.co)
+ACTUALIP=\$(dig +short myip.opendns.com @resolver1.opendns.com)
 if [[ "\$VPNIP" == "\$ACTUALIP" ]]; then echo "PASSED (IP: \${VPNIP})"; else echo "FAILED (IP: \${ACTUALIP}, VPN IP: \${VPNIP})"; fi
 
 echo
