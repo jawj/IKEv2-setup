@@ -1,6 +1,6 @@
 # IKEv2-setup
 
-## Table of Contents
+## Table of contents
 
   * [What?](#what)
     + [VPN server](#vpn-server)
@@ -13,6 +13,7 @@
     + [Bonus paranoia](#bonus-paranoia)
   * [Why?](#why)
     + [Why IKEv2?](#why-ikev2)
+    + [Why not Algo?](#why-not-algo)
 
 ## What?
 
