@@ -39,7 +39,7 @@ echo "--- Configuration: VPN settings ---"
 echo
 
 ETH0ORSIMILAR=$(ip route get 1.1.1.1 | awk -- '{printf $5}')
-IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
+IP=$(dig -4 +short myip.opendns.com @resolver1.opendns.com)
 
 echo "Network interface: ${ETH0ORSIMILAR}"
 echo "External IP: ${IP}"
@@ -539,7 +539,7 @@ ipsec statusall
 echo
 echo -n "Testing IP address ... "
 VPNIP=\$(dig -4 +short ${VPNHOST})
-ACTUALIP=\$(dig +short myip.opendns.com @resolver1.opendns.com)
+ACTUALIP=\$(dig -4 +short myip.opendns.com @resolver1.opendns.com)
 if [[ "\$VPNIP" == "\$ACTUALIP" ]]; then echo "PASSED (IP: \${VPNIP})"; else echo "FAILED (IP: \${ACTUALIP}, VPN IP: \${VPNIP})"; fi
 
 echo
