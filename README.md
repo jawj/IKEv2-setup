@@ -49,7 +49,7 @@ Configuration files, scripts and instructions are sent by email. They are also d
 
   _Don't want to use your own domain name here? You could try using the reverse DNS name provided by your server host, or an automatic IP/DNS alias service such as [sslip.io](https://sslip.io/), [xip.io](http://xip.io), [nip.io](https://nip.io), [s.test.cab](https://s.test.cab), or [xip.lhjmmc.cn](https://xip.lhjmmc.cn/) (earlier versions of this script used an [sslip.io](https://sslip.io/) address by default). However, both of these options may fall foul of Let's Encrypt's per-domain rate limit of [50 certificates per week](https://letsencrypt.org/docs/rate-limits/). Note that ephemeral AWS domain names like `ec2-34-267-212-76.compute-1.amazonaws.com` [are not accepted by Let's Encrypt](https://community.letsencrypt.org/t/policy-forbids-issuing-for-name-on-amazon-ec2-domain/12692)._
 
-2. Start with a clean Ubuntu 18.04 Server installation. The cheapest VPSs offered by Linode, OVH, vps.ag, Hetzner and Vultr, and Scaleway's ARM64-2GB, have all been tested working. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr, port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
+2. Start with a clean Ubuntu 18.04 Server installation. The cheapest VPSs offered by Linode, OVH, vps.ag, Google, Hetzner and Vultr, and Scaleway's ARM64-2GB, have all been tested working. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr, port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
 
 3. Optionally, set up [key-based SSH authentication](https://help.ubuntu.com/community/SSH/OpenSSH/Keys) (alternatively, this may have been handled automatically by your server provider, or you may choose to stick with password-based authentication). This may require you to run some or all of the following commands, with appropriate substitutions, on the machine you're going to be logging in from:
 
@@ -118,7 +118,9 @@ Configuration files, scripts and instructions are sent by email. They are also d
 
 If things don't work out right away ...
 
-* Make sure you created the client connection using the emailed `.mobileconfig` file or PowerShell commands. Setting it up manually via the OS GUI will not work, since it will default to insecure ciphers which the server has not been configured to support.
+* On the client: make sure you created the connection using the newly emailed `.mobileconfig` file or PowerShell commands. Setting it up manually via the OS GUI will _not_ work, since it will default to insecure ciphers which the server has not been configured to support. Also note that `.mobileconfig` files generated with earlier iterations of this script may no longer be compatible, since the configured ciphers have changed from time to time.
+
+* On the server: check that network ingress for UDP on ports 500 and 4500 is enabled (on some cloud platforms you'll have to add appropriate firewall rules to your virtual network). Also check that packet forwarding is enabled (on some cloud platforms this is controlled by a configuration setting that's off by default).
 
 * Check the server logs on strongSwan startup and when you try to connect, and the client logs when you try to connect. 
 
