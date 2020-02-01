@@ -8,15 +8,17 @@ echo
 echo "=== https://github.com/jawj/IKEv2-setup ==="
 echo
 
+
 function exit_badly {
-  echo $1
+  echo "$1"
   exit 1
 }
 
 [[ $(lsb_release -rs) == "18.04" ]] || exit_badly "This script is for Ubuntu 18.04 only: aborting (if you know what you're doing, try deleting this check)"
 [[ $(id -u) -eq 0 ]] || exit_badly "Please re-run as root (e.g. sudo ./path/to/this/script)"
 
-echo "--- Updating and installing software ---"
+
+echo "--- Adding repositories and installing utilities ---"
 echo
 
 export DEBIAN_FRONTEND=noninteractive
@@ -29,13 +31,7 @@ add-apt-repository universe
 add-apt-repository restricted
 add-apt-repository multiverse
 
-apt-get -o Acquire::ForceIPv4=true --with-new-pkgs upgrade -y
-apt autoremove -y
-
-debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
-debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
-
-apt-get -o Acquire::ForceIPv4=true install -y language-pack-en strongswan libstrongswan-standard-plugins strongswan-libcharon libcharon-standard-plugins libcharon-extra-plugins moreutils iptables-persistent postfix mutt unattended-upgrades certbot dnsutils uuid-runtime
+apt-get -o Acquire::ForceIPv4=true install -y moreutils dnsutils
 
 
 echo
@@ -43,30 +39,30 @@ echo "--- Configuration: VPN settings ---"
 echo
 
 ETH0ORSIMILAR=$(ip route get 1.1.1.1 | awk -- '{printf $5}')
-IP=$(ifdata -pa $ETH0ORSIMILAR)
+IP=$(ifdata -pa "${ETH0ORSIMILAR}")
 
 echo "Network interface: ${ETH0ORSIMILAR}"
 echo "External IP: ${IP}"
 echo
 echo "** Note: this hostname must already resolve to this machine, to enable Let's Encrypt certificate setup **"
-read -p "Hostname for VPN: " VPNHOST
+read -r -p "Hostname for VPN: " VPNHOST
 
-VPNHOSTIP=$(dig -4 +short "$VPNHOST")
+VPNHOSTIP=$(dig -4 +short "${VPNHOST}")
 [[ -n "$VPNHOSTIP" ]] || exit_badly "Cannot resolve VPN hostname: aborting"
 
-if [[ "$IP" != "$VPNHOSTIP" ]]; then
-  echo "Warning: $VPNHOST resolves to $VPNHOSTIP, not $IP"
+if [[ "${IP}" != "${VPNHOSTIP}" ]]; then
+  echo "Warning: ${VPNHOST} resolves to ${VPNHOSTIP}, not ${IP}"
   echo "Either you're behind NAT, or something is wrong (e.g. hostname points to wrong IP, CloudFlare proxying shenanigans, ...)"
-  read -p "Press [Return] to continue anyway, or Ctrl-C to abort" DUMMYVAR
+  read -r -p "Press [Return] to continue anyway, or Ctrl-C to abort"
 fi
 
-read -p "VPN username: " VPNUSERNAME
+read -r -p "VPN username: " VPNUSERNAME
 while true; do
-read -s -p "VPN password (no quotes, please): " VPNPASSWORD
+read -r -s -p "VPN password (no quotes, please): " VPNPASSWORD
 echo
-read -s -p "Confirm VPN password: " VPNPASSWORD2
+read -r -s -p "Confirm VPN password: " VPNPASSWORD2
 echo
-[[ "$VPNPASSWORD" = "$VPNPASSWORD2" ]] && break
+[[ "${VPNPASSWORD}" = "${VPNPASSWORD2}" ]] && break
 echo "Passwords didn't match -- please try again"
 done
 
@@ -86,27 +82,28 @@ Public DNS servers include:
 77.88.8.7,77.88.8.3              Yandex Family         https://dns.yandex.com
 '
 
-read -p "DNS servers for VPN users (default: 1.1.1.1,1.0.0.1): " VPNDNS
+read -r -p "DNS servers for VPN users (default: 1.1.1.1,1.0.0.1): " VPNDNS
 VPNDNS=${VPNDNS:-'1.1.1.1,1.0.0.1'}
+
 
 echo
 echo "--- Configuration: general server settings ---"
 echo
 
-read -p "Timezone (default: Europe/London): " TZONE
+read -r -p "Timezone (default: Europe/London): " TZONE
 TZONE=${TZONE:-'Europe/London'}
 
-read -p "Email address for sysadmin (e.g. j.bloggs@example.com): " EMAILADDR
+read -r -p "Email address for sysadmin (e.g. j.bloggs@example.com): " EMAILADDR
 
-read -p "Desired SSH log-in port (default: 22): " SSHPORT
+read -r -p "Desired SSH log-in port (default: 22): " SSHPORT
 SSHPORT=${SSHPORT:-22}
 
-read -p "New SSH log-in user name: " LOGINUSERNAME
+read -r -p "New SSH log-in user name: " LOGINUSERNAME
 
 CERTLOGIN="n"
 if [[ -s /root/.ssh/authorized_keys ]]; then
   while true; do
-    read -p "Copy /root/.ssh/authorized_keys to new user and disable SSH password log-in [Y/n]? " CERTLOGIN
+    read -r -p "Copy /root/.ssh/authorized_keys to new user and disable SSH password log-in [Y/n]? " CERTLOGIN
     [[ ${CERTLOGIN,,} =~ ^(y(es)?)?$ ]] && CERTLOGIN=y
     [[ ${CERTLOGIN,,} =~ ^no?$ ]] && CERTLOGIN=n
     [[ $CERTLOGIN =~ ^(y|n)$ ]] && break
@@ -114,16 +111,29 @@ if [[ -s /root/.ssh/authorized_keys ]]; then
 fi
 
 while true; do
-  [[ $CERTLOGIN = "y" ]] && read -s -p "New SSH user's password (e.g. for sudo): " LOGINPASSWORD
-  [[ $CERTLOGIN != "y" ]] && read -s -p "New SSH user's log-in password (must be REALLY STRONG): " LOGINPASSWORD
+  [[ ${CERTLOGIN} = "y" ]] && read -r -s -p "New SSH user's password (e.g. for sudo): " LOGINPASSWORD
+  [[ ${CERTLOGIN} != "y" ]] && read -r -s -p "New SSH user's log-in password (must be REALLY STRONG): " LOGINPASSWORD
   echo
-  read -s -p "Confirm new SSH user's password: " LOGINPASSWORD2
+  read -r -s -p "Confirm new SSH user's password: " LOGINPASSWORD2
   echo
-  [[ "$LOGINPASSWORD" = "$LOGINPASSWORD2" ]] && break
+  [[ "${LOGINPASSWORD}" = "${LOGINPASSWORD2}" ]] && break
   echo "Passwords didn't match -- please try again"
 done
 
-VPNIPPOOL="10.10.0.0/16"
+VPNIPPOOL="10.101.0.0/16"
+
+
+echo
+echo "--- Upgrading and installing packages ---"
+echo
+
+apt-get -o Acquire::ForceIPv4=true --with-new-pkgs upgrade -y
+apt autoremove -y
+
+debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
+debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
+
+apt-get -o Acquire::ForceIPv4=true install -y language-pack-en strongswan libstrongswan-standard-plugins strongswan-libcharon libcharon-standard-plugins libcharon-extra-plugins  iptables-persistent postfix mutt unattended-upgrades certbot uuid-runtime
 
 
 echo
@@ -155,11 +165,11 @@ iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m state --state INVALID -j DROP
 
 # rate-limit repeated new requests from same IP to any ports
-iptables -I INPUT -i $ETH0ORSIMILAR -m state --state NEW -m recent --set
-iptables -I INPUT -i $ETH0ORSIMILAR -m state --state NEW -m recent --update --seconds 300 --hitcount 60 -j DROP
+iptables -I INPUT -i "${ETH0ORSIMILAR}" -m state --state NEW -m recent --set
+iptables -I INPUT -i "${ETH0ORSIMILAR}" -m state --state NEW -m recent --update --seconds 300 --hitcount 60 -j DROP
 
 # accept (non-standard) SSH
-iptables -A INPUT -p tcp --dport $SSHPORT -j ACCEPT
+iptables -A INPUT -p tcp --dport "${SSHPORT}" -j ACCEPT
 
 
 # VPN
@@ -169,15 +179,15 @@ iptables -A INPUT -p udp --dport  500 -j ACCEPT
 iptables -A INPUT -p udp --dport 4500 -j ACCEPT
 
 # forward VPN traffic anywhere
-iptables -A FORWARD --match policy --pol ipsec --dir in  --proto esp -s $VPNIPPOOL -j ACCEPT
-iptables -A FORWARD --match policy --pol ipsec --dir out --proto esp -d $VPNIPPOOL -j ACCEPT
+iptables -A FORWARD --match policy --pol ipsec --dir in  --proto esp -s "${VPNIPPOOL}" -j ACCEPT
+iptables -A FORWARD --match policy --pol ipsec --dir out --proto esp -d "${VPNIPPOOL}" -j ACCEPT
 
 # reduce MTU/MSS values for dumb VPN clients
-iptables -t mangle -A FORWARD --match policy --pol ipsec --dir in -s $VPNIPPOOL -o $ETH0ORSIMILAR -p tcp -m tcp --tcp-flags SYN,RST SYN -m tcpmss --mss 1361:1536 -j TCPMSS --set-mss 1360
+iptables -t mangle -A FORWARD --match policy --pol ipsec --dir in -s "${VPNIPPOOL}" -o "${ETH0ORSIMILAR}" -p tcp -m tcp --tcp-flags SYN,RST SYN -m tcpmss --mss 1361:1536 -j TCPMSS --set-mss 1360
 
 # masquerade VPN traffic over eth0 etc.
-iptables -t nat -A POSTROUTING -s $VPNIPPOOL -o $ETH0ORSIMILAR -m policy --pol ipsec --dir out -j ACCEPT  # exempt IPsec traffic from masquerading
-iptables -t nat -A POSTROUTING -s $VPNIPPOOL -o $ETH0ORSIMILAR -j MASQUERADE
+iptables -t nat -A POSTROUTING -s "${VPNIPPOOL}" -o "${ETH0ORSIMILAR}" -m policy --pol ipsec --dir out -j ACCEPT  # exempt IPsec traffic from masquerading
+iptables -t nat -A POSTROUTING -s "${VPNIPPOOL}" -o "${ETH0ORSIMILAR}" -j MASQUERADE
 
 
 # fall through to drop any other input and forward traffic
@@ -204,11 +214,11 @@ post-hook = /sbin/iptables -D INPUT -p tcp --dport 80 -j ACCEPT
 renew-hook = /usr/sbin/ipsec reload && /usr/sbin/ipsec secrets
 ' > /etc/letsencrypt/cli.ini
 
-certbot certonly --non-interactive --agree-tos --standalone --preferred-challenges http --email $EMAILADDR -d $VPNHOST
+certbot certonly --non-interactive --agree-tos --standalone --preferred-challenges http --email "${EMAILADDR}" -d "${VPNHOST}"
 
-ln -f -s /etc/letsencrypt/live/$VPNHOST/cert.pem    /etc/ipsec.d/certs/cert.pem
-ln -f -s /etc/letsencrypt/live/$VPNHOST/privkey.pem /etc/ipsec.d/private/privkey.pem
-ln -f -s /etc/letsencrypt/live/$VPNHOST/chain.pem   /etc/ipsec.d/cacerts/chain.pem
+ln -f -s "/etc/letsencrypt/live/${VPNHOST}/cert.pem"    /etc/ipsec.d/certs/cert.pem
+ln -f -s "/etc/letsencrypt/live/${VPNHOST}/privkey.pem" /etc/ipsec.d/private/privkey.pem
+ln -f -s "/etc/letsencrypt/live/${VPNHOST}/chain.pem"   /etc/ipsec.d/cacerts/chain.pem
 
 grep -Fq 'jawj/IKEv2-setup' /etc/apparmor.d/local/usr.lib.ipsec.charon || echo "
 # https://github.com/jawj/IKEv2-setup
@@ -275,7 +285,7 @@ conn roadwarrior
 " > /etc/ipsec.conf
 
 echo "${VPNHOST} : RSA \"privkey.pem\"
-${VPNUSERNAME} : EAP \""${VPNPASSWORD}"\"
+${VPNUSERNAME} : EAP \"${VPNPASSWORD}\"
 " > /etc/ipsec.secrets
 
 ipsec restart
@@ -287,9 +297,9 @@ echo
 
 # user + SSH
 
-id -u $LOGINUSERNAME &>/dev/null || adduser --disabled-password --gecos "" $LOGINUSERNAME
+id -u "${LOGINUSERNAME}" &>/dev/null || adduser --disabled-password --gecos "" "${LOGINUSERNAME}"
 echo "${LOGINUSERNAME}:${LOGINPASSWORD}" | chpasswd
-adduser ${LOGINUSERNAME} sudo
+adduser "${LOGINUSERNAME}" sudo
 
 sed -r \
 -e "s/^#?Port 22$/Port ${SSHPORT}/" \
@@ -306,13 +316,13 @@ MaxAuthTries 2
 UseDNS no" >> /etc/ssh/sshd_config
 
 if [[ $CERTLOGIN = "y" ]]; then
-  mkdir -p /home/${LOGINUSERNAME}/.ssh
-  chown $LOGINUSERNAME /home/${LOGINUSERNAME}/.ssh
-  chmod 700 /home/${LOGINUSERNAME}/.ssh
+  mkdir -p "/home/${LOGINUSERNAME}/.ssh"
+  chown "${LOGINUSERNAME}" "/home/${LOGINUSERNAME}/.ssh"
+  chmod 700 "/home/${LOGINUSERNAME}/.ssh"
 
-  cp /root/.ssh/authorized_keys /home/${LOGINUSERNAME}/.ssh/authorized_keys
-  chown $LOGINUSERNAME /home/${LOGINUSERNAME}/.ssh/authorized_keys
-  chmod 600 /home/${LOGINUSERNAME}/.ssh/authorized_keys
+  cp "/root/.ssh/authorized_keys" "/home/${LOGINUSERNAME}/.ssh/authorized_keys"
+  chown "${LOGINUSERNAME}" "/home/${LOGINUSERNAME}/.ssh/authorized_keys"
+  chmod 600 "/home/${LOGINUSERNAME}/.ssh/authorized_keys"
 
   sed -r \
   -e "s/^#?PasswordAuthentication yes$/PasswordAuthentication no/" \
@@ -326,7 +336,7 @@ echo
 echo "--- Timezone, mail, unattended upgrades ---"
 echo
 
-timedatectl set-timezone $TZONE
+timedatectl set-timezone "${TZONE}"
 /usr/sbin/update-locale LANG=en_GB.UTF-8
 
 
@@ -365,7 +375,7 @@ echo
 echo "--- Creating configuration files ---"
 echo
 
-cd /home/${LOGINUSERNAME}
+cd "/home/${LOGINUSERNAME}"
 
 cat << EOF > vpn-ios-or-mac.mobileconfig
 <?xml version='1.0' encoding='UTF-8'?>
@@ -586,7 +596,7 @@ A bash script to set up strongSwan as a VPN client is attached as vpn-ubuntu-cli
 
 EOF
 
-EMAIL=$USER@$VPNHOST mutt -s "VPN configuration" -a vpn-ios-or-mac.mobileconfig vpn-ubuntu-client.sh -- $EMAILADDR < vpn-instructions.txt
+EMAIL=$USER@$VPNHOST mutt -s "VPN configuration" -a vpn-ios-or-mac.mobileconfig vpn-ubuntu-client.sh -- "${EMAILADDR}" < vpn-instructions.txt
 
 echo
 echo "--- How to connect ---"
