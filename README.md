@@ -17,7 +17,7 @@
 
 ## What?
 
-A Bash script that takes Ubuntu Server 18.04 LTS from clean install to production-ready IKEv2 VPN with strongSwan. Comments and pull requests welcome. It may still work on 17.10, 17.04 or 16.10 if you remove the version check, but these are not tested.
+A Bash script that takes Ubuntu Server 20.04 LTS or 18.04 LTS from clean install to production-ready IKEv2 VPN with strongSwan. Comments and pull requests welcome. It may still work on 17.10, 17.04 or 16.10 if you remove the version check, but these are not tested.
 
 ### VPN server
 
@@ -50,7 +50,7 @@ Configuration files, scripts and instructions are sent by email. They are also d
 
   _Don't want to use your own domain name here? You could try using the reverse DNS name provided by your server host, or an automatic IP/DNS alias service such as [sslip.io](https://sslip.io/), [xip.io](http://xip.io), [nip.io](https://nip.io), [s.test.cab](https://s.test.cab), or [xip.lhjmmc.cn](https://xip.lhjmmc.cn/) (earlier versions of this script used an [sslip.io](https://sslip.io/) address by default). However, both of these options may fall foul of Let's Encrypt's per-domain rate limit of [50 certificates per week](https://letsencrypt.org/docs/rate-limits/). Note that ephemeral AWS domain names like `ec2-34-267-212-76.compute-1.amazonaws.com` [are not accepted by Let's Encrypt](https://community.letsencrypt.org/t/policy-forbids-issuing-for-name-on-amazon-ec2-domain/12692)._
 
-2. Start with a clean Ubuntu 18.04 Server installation. The cheapest VPSs offered by Linode, OVH, vps.ag, Google, Hetzner and Vultr, and Scaleway's ARM64-2GB, have all been tested working. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr, port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
+2. Start with a clean Ubuntu 20.04 or 18.04 Server installation. The cheapest VPSs offered by Linode, OVH, vps.ag, Google, Hetzner and Vultr, and Scaleway's ARM64-2GB, have all been tested working. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr, port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
 
 3. Optionally, set up [key-based SSH authentication](https://help.ubuntu.com/community/SSH/OpenSSH/Keys) (alternatively, this may have been handled automatically by your server provider, or you may choose to stick with password-based authentication). This may require you to run some or all of the following commands, with appropriate substitutions, on the machine you're going to be logging in from:
 
