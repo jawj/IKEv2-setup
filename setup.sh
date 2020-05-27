@@ -197,10 +197,7 @@ iptables -A FORWARD -j DROP
 
 iptables -L
 
-debconf-set-selections <<< "iptables-persistent iptables-persistent/autosave_v4 boolean true"
-debconf-set-selections <<< "iptables-persistent iptables-persistent/autosave_v6 boolean true"
-dpkg-reconfigure iptables-persistent
-
+netfilter-persistent save
 
 echo
 echo "--- Configuring RSA certificates ---"
