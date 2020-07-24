@@ -234,7 +234,7 @@ echo
 # ip_no_pmtu_disc is for UDP fragmentation
 # others are for security
 
-grep -Fq 'jawj/IKEv2-setup' /etc/sysctl.conf || echo '
+grep -Fq 'jawj/IKEv2-setup' /etc/sysctl.conf || echo "
 # https://github.com/jawj/IKEv2-setup
 net.ipv4.ip_forward = 1
 net.ipv4.ip_no_pmtu_disc = 1
@@ -244,7 +244,8 @@ net.ipv4.conf.all.send_redirects = 0
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
 net.ipv6.conf.lo.disable_ipv6 = 1
-' >> /etc/sysctl.conf
+net.ipv6.conf.${ETH0ORSIMILAR}.disable_ipv6 = 1
+" >> /etc/sysctl.conf
 
 sysctl -p
 
