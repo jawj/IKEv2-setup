@@ -484,6 +484,22 @@ cat << EOF > vpn-ios-or-mac.mobileconfig
 </plist>
 EOF
 
+grep -Fq 'jawj/IKEv2-setup' /etc/mime.types || echo "
+# https://github.com/jawj/IKEv2-setup
+application/vnd.strongswan.profile sswan
+" >> /etc/mime.types
+
+cat << EOF > vpn-android.sswan
+{
+  "uuid": "$(uuidgen)",
+  "name": "${VPNHOST}",
+  "type": "ikev2-eap",
+  "remote": {
+    "addr": "${VPNHOST}"
+  }
+}
+EOF
+
 cat << EOF > vpn-ubuntu-client.sh
 #!/bin/bash -e
 if [[ \$(id -u) -ne 0 ]]; then echo "Please run as root (e.g. sudo ./path/to/this/script)"; exit 1; fi
@@ -578,15 +594,15 @@ Set-VpnConnectionIPsecConfiguration -ConnectionName "${VPNHOST}" \`
 
 Set-VpnConnection -Name "${VPNHOST}" -SplitTunneling \$True
 
+You will need to enter your chosen VPN username and password in order to connect.
 
 == Android ==
 
 Download the strongSwan app from the Play Store: https://play.google.com/store/apps/details?id=org.strongswan.android
 
-Server: ${VPNHOST}
-VPN Type: IKEv2 EAP (Username/Password)
-Username and password: as configured on the server
-CA certificate: Select automatically
+Then open the attached .sswan file, or select it after choosing 'Import VPN profile' from the strongSwan app menu. You will need to enter your chosen VPN username and password in order to connect.
+
+For a persistent connection, go to your device's Settings app and choose Network & Internet > Advanced > VPN > strongSwan VPN Client, tap the gear icon and toggle on 'Always-on VPN' (these options may differ by Android version and provider).
 
 
 == Ubuntu ==
@@ -595,7 +611,7 @@ A bash script to set up strongSwan as a VPN client is attached as vpn-ubuntu-cli
 
 EOF
 
-EMAIL=$USER@$VPNHOST mutt -s "VPN configuration" -a vpn-ios-or-mac.mobileconfig vpn-ubuntu-client.sh -- "${EMAILADDR}" < vpn-instructions.txt
+EMAIL=$USER@$VPNHOST mutt -s "VPN configuration" -a vpn-ios-or-mac.mobileconfig vpn-android.sswan vpn-ubuntu-client.sh -- "${EMAILADDR}" < vpn-instructions.txt
 
 echo
 echo "--- How to connect ---"
