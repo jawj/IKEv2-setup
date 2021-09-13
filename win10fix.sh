@@ -29,10 +29,12 @@ apt-get -o Acquire::ForceIPv4=true update
 apt-get -o Acquire::ForceIPv4=true install -y curl
 
 curl https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem > /etc/ipsec.d/cacerts/chain.pem
+ipsec rereadcacerts
 
 echo "
 #!/bin/bash -e
 curl https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem > /etc/ipsec.d/cacerts/chain.pem
+ipsec rereadcacerts
 " > /etc/letsencrypt/renewal-hooks/post/win10fix
 
 chmod +x /etc/letsencrypt/renewal-hooks/post/win10fix
