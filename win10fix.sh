@@ -5,7 +5,7 @@
 # Released under the MIT licence: http://opensource.org/licenses/mit-license
 
 echo
-echo "There's a Windows 10 bug where rasdial.exe fails to download root certificates.
+echo "There's a Windows 10 bug where rasdial.exe fails to download root certificates."
 echo "That makes VPN connections fail with the message 'IKE authentication credentials are unacceptable'."
 echo
 echo "The current PowerShell VPN client setup script provided by this project works around the bug on each local Windows 10 machine."
