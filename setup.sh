@@ -573,6 +573,9 @@ A configuration profile is attached as vpn-ios-or-mac.mobileconfig — simply op
 
 You will need Windows 10 Pro or above. Please run the following commands in PowerShell:
 
+$Response = Invoke-WebRequest -UseBasicParsing -Uri https://valid-isrgrootx1.letsencrypt.org
+# ^ this line fixes a certificate lazy-loading bug: see https://github.com/jawj/IKEv2-setup/issues/126
+
 Add-VpnConnection -Name "${VPNHOST}" \`
   -ServerAddress "${VPNHOST}" \`
   -TunnelType IKEv2 \`
@@ -595,6 +598,7 @@ Set-VpnConnectionIPsecConfiguration -ConnectionName "${VPNHOST}" \`
 Set-VpnConnection -Name "${VPNHOST}" -SplitTunneling \$True
 
 You will need to enter your chosen VPN username and password in order to connect.
+
 
 == Android ==
 
