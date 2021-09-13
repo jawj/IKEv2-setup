@@ -28,11 +28,11 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get -o Acquire::ForceIPv4=true update
 apt-get -o Acquire::ForceIPv4=true install -y curl
 
-mv /etc/ipsec.d/cacerts/chain.pem /etc/ipsec.d/cacerts/chain.pem.original
 curl https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem > /etc/ipsec.d/cacerts/chain.pem
 
 echo "
 #!/bin/bash -e
-mv /etc/ipsec.d/cacerts/chain.pem /etc/ipsec.d/cacerts/chain.pem.original
 curl https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem > /etc/ipsec.d/cacerts/chain.pem
 " > /etc/letsencrypt/renewal-hooks/post/win10fix
+
+chmod +x /etc/letsencrypt/renewal-hooks/post/win10fix
