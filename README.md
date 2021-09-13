@@ -113,11 +113,12 @@ Configuration files, scripts and instructions are sent by email. They are also d
         sudo ipsec statusall           # status, who's connected, etc.
         sudo iptables -L -v            # how much traffic has been forwarded, dropped, etc.?
         sudo tail -f /var/log/syslog   # real-time logs of (dis)connections etc.
-        
 
 ### Troubleshooting
 
-If things don't work out right away ...
+If you ran this script before 13 September 2021, and used the generated PowerShell commands to set up Windows 10 clients, those clients may be unable to connect owing to a bug in Windows 10. If this is the case, see [issue #126](https://github.com/jawj/IKEv2-setup/issues/126) and, if necessary, retrieve and run [`win10fix.sh`](https://raw.githubusercontent.com/jawj/IKEv2-setup/master/win10fix.sh).
+
+Otherwise, if things don't work out right away ...
 
 * On the client: make sure you created the connection using the newly emailed `.mobileconfig` file or PowerShell commands. Setting it up manually via the OS GUI will _not_ work, since it will default to insecure ciphers which the server has not been configured to support. Also note that `.mobileconfig` files generated with earlier iterations of this script may no longer be compatible, since the configured ciphers have changed from time to time.
 
