@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # github.com/jawj/IKEv2-setup
-# Copyright (c) 2015 – 2020 George MacKerron
+# Copyright (c) 2015 – 2021 George MacKerron
 # Released under the MIT licence: http://opensource.org/licenses/mit-license
 
 echo
