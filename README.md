@@ -30,7 +30,7 @@ A Bash script that takes Ubuntu Server 20.04 LTS or 18.04 LTS from clean install
 
 The VPN is tested working with:
 
-*  **macOS 10.12 – 10.15, iOS 10 – 13**  — Built-in clients. A `.mobileconfig` profile is generated for Mac and iOS, to set up secure ciphers and enable *Connect on demand* support.
+*  **macOS 10.12 – 12.0, iOS 10 – 15**  — Built-in clients. A `.mobileconfig` profile is generated for Mac and iOS, to set up secure ciphers and enable *Connect on demand* support.
 * **Windows 10 Pro** — Built-in client. PowerShell commands are generated to configure the VPN and secure ciphers.
 * **Ubuntu (17.04 and presumably others)** — Using strongSwan. A Bash script is generated to set this up.
 * **Android** — Using the official strongSwan app.
@@ -116,7 +116,7 @@ Configuration files, scripts and instructions are sent by email. They are also d
 
 ### Troubleshooting
 
-If you ran this script before 13 September 2021, and used the generated PowerShell commands to set up Windows 10 clients, those clients may be unable to connect owing to a bug in Windows 10. If this is the case, see [issue #126](https://github.com/jawj/IKEv2-setup/issues/126) and, if necessary, retrieve and run [`win10fix.sh`](https://raw.githubusercontent.com/jawj/IKEv2-setup/master/win10fix.sh).
+If you ran this script before 13 September 2021, and used the generated PowerShell commands to set up Windows 10 clients, those clients may be unable to connect owing to a bug in Windows 10. If this is the case, see [issue #126](https://github.com/jawj/IKEv2-setup/issues/126).
 
 Otherwise, if things don't work out right away ...
 
