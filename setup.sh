@@ -38,7 +38,7 @@ echo
 echo "--- Configuration: VPN settings ---"
 echo
 
-ETH0ORSIMILAR=$(ip route get 1.1.1.1 | awk -- '{printf $5}')
+ETH0ORSIMILAR=$(ip route get 1.1.1.1 | grep -oP ' dev \K\S+')
 IP=$(dig -4 +short myip.opendns.com @resolver1.opendns.com)
 
 echo "Network interface: ${ETH0ORSIMILAR}"
