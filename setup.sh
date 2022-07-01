@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # github.com/jawj/IKEv2-setup
-# Copyright (c) 2015 – 2021 George MacKerron
+# Copyright (c) 2015 – 2022 George MacKerron
 # Released under the MIT licence: http://opensource.org/licenses/mit-license
 
 echo
@@ -14,7 +14,7 @@ function exit_badly {
   exit 1
 }
 
-[[ $(lsb_release -rs) == "18.04" ]] || [[ $(lsb_release -rs) == "20.04" ]] || exit_badly "This script is for Ubuntu 20.04 or 18.04 only: aborting (if you know what you're doing, try deleting this check)"
+[[ $(lsb_release -rs) == "18.04" ]] || [[ $(lsb_release -rs) == "20.04" ]] || [[ $(lsb_release -rs) == "22.04" ]] || exit_badly "This script is for Ubuntu 20.04 or 18.04 only: aborting (if you know what you're doing, try deleting this check)"
 [[ $(id -u) -eq 0 ]] || exit_badly "Please re-run as root (e.g. sudo ./path/to/this/script)"
 
 
@@ -133,8 +133,9 @@ apt autoremove -y
 debconf-set-selections <<< "postfix postfix/mailname string ${VPNHOST}"
 debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
 
-apt-get -o Acquire::ForceIPv4=true install -y language-pack-en strongswan libstrongswan-standard-plugins strongswan-libcharon libcharon-standard-plugins libcharon-extra-plugins  iptables-persistent postfix mutt unattended-upgrades certbot uuid-runtime
-
+apt-get -o Acquire::ForceIPv4=true install -y language-pack-en strongswan libstrongswan-standard-plugins strongswan-libcharon libcharon-extra-plugins  iptables-persistent postfix mutt unattended-upgrades certbot uuid-runtime
+# in 22.04 libcharon-standard-plugins replaced with libcharon-extauth-plugins
+apt-get install -y libcharon-standard-plugins || apt-get install -y libcharon-extauth-plugins
 
 echo
 echo "--- Configuring firewall ---"
