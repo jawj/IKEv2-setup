@@ -58,7 +58,7 @@ Configuration files, scripts and instructions are sent by email. They are also d
        ssh-keygen -t rsa -b 4096 -C "me@my-domain.tld"  # alternatively, use RSA and go (4,096 bits) large
 
        ssh root@myvpn.example.net  # if your host forces a password change before anything else (e.g. Hetzner), do it now, then exit
-       ssh-copy-id -i ~/.ssh/id_ed25519 root@myvpn.example.net  # copy your public key over to the VPN server
+       ssh-copy-id -i ~/.ssh/id_ed25519.pub root@myvpn.example.net  # copy your public key over to the VPN server
        ssh root@myvpn.example.net  # log back in to the server for the next step ...
 
 4. On your new server installation, become `root`, download the script, give it execute permissions, and run it:
