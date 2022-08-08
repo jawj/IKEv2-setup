@@ -17,20 +17,21 @@
 
 ## What?
 
-A Bash script that takes Ubuntu Server 20.04 LTS or 18.04 LTS from clean install to production-ready IKEv2 VPN with strongSwan. Comments and pull requests welcome. It may still work on 17.10, 17.04 or 16.10 if you remove the version check, but these are not tested.
+A Bash script that takes Ubuntu Server 22.04, 20.04 or 18.04 LTS from clean install to production-ready IKEv2 VPN with strongSwan. Comments and pull requests welcome. It may still work on older Ubuntu versions back to 16.10 if you remove the version check, but these are not tested.
 
 ### VPN server
 
 * The VPN server identifies itself with a _Let's Encrypt_ certificate, so there's no need for clients to install private certificates — they can simply authenticate with username and strong password (EAP-MSCHAPv2).
+
 * The only cipher set implemented is [CNSA/RFC 6379 Suite B](https://wiki.strongswan.org/projects/strongswan/wiki/IKEv2CipherSuites#Commercial-National-Security-Algorithm-CNSA-Suite-Suite-B-Cryptographic-Suites-for-IPsec-RFC-6379) with confidentiality/encryption.
 
-* The box is firewalled with `iptables` and configured for unattended security upgrades, and the _Let's Encrypt_ certificate is set up to auto-renew, so it _could_ be safe to forget about it all until 18.04 reaches end-of-life in 2023. (Note that `iptables` setup includes [basic rate-limiting](https://debian-administration.org/article/187/Using_iptables_to_rate-limit_incoming_connections), dropping new connections if there have been 60+ connection attempts in the last 5 minutes).
+* The box is firewalled with `iptables` and configured for unattended security upgrades, and the _Let's Encrypt_ certificate is set up to auto-renew, so it _could_ be safe to forget about it all until your chosen Ubuntu version reaches end-of-life. (Note that `iptables` setup includes [basic rate-limiting](https://debian-administration.org/article/187/Using_iptables_to_rate-limit_incoming_connections), dropping new connections if there have been 60+ connection attempts in the last 5 minutes).
 
 ### VPN clients
 
 The VPN is tested working with:
 
-*  **macOS 10.12 – 12.0, iOS 10 – 15**  — Built-in clients. A `.mobileconfig` profile is generated for Mac and iOS, to set up secure ciphers and enable *Connect on demand* support.
+*  **macOS 10.12 – 12.5, iOS 10 – 15.6**  — Built-in clients. A `.mobileconfig` profile is generated for Mac and iOS, to set up secure ciphers and enable *Connect on demand* support.
 * **Windows 10 Pro** — Built-in client. PowerShell commands are generated to configure the VPN and secure ciphers.
 * **Ubuntu (17.04 and presumably others)** — Using strongSwan. A Bash script is generated to set this up.
 * **Android** — Using the official strongSwan app.
@@ -48,9 +49,9 @@ Configuration files, scripts and instructions are sent by email. They are also d
 
 1. Pick a domain name for the VPN server and **ensure that it already resolves to the correct IP** by creating the appropriate `A` record in the DNS and making sure it has propagated. _Let's Encrypt_ needs this in order to create your server certificate.
 
-  _Don't want to use your own domain name here? You could try using the reverse DNS name provided by your server host, or an automatic IP/DNS alias service such as [sslip.io](https://sslip.io/), [xip.io](http://xip.io), [nip.io](https://nip.io), [s.test.cab](https://s.test.cab), or [xip.lhjmmc.cn](https://xip.lhjmmc.cn/) (earlier versions of this script used an [sslip.io](https://sslip.io/) address by default). However, both of these options may fall foul of Let's Encrypt's per-domain rate limit of [50 certificates per week](https://letsencrypt.org/docs/rate-limits/). Note that ephemeral AWS domain names like `ec2-34-267-212-76.compute-1.amazonaws.com` [are not accepted by Let's Encrypt](https://community.letsencrypt.org/t/policy-forbids-issuing-for-name-on-amazon-ec2-domain/12692)._
+  _Don't want to use your own domain name here? You could try using the reverse DNS name provided by your server host, or an automatic IP/DNS alias service such as [sslip.io](https://sslip.io/), [xip.io](http://xip.io), [nip.io](https://nip.io), [s.test.cab](https://s.test.cab), or [xip.lhjmmc.cn](https://xip.lhjmmc.cn/) (earlier versions of this script used an [sslip.io](https://sslip.io/) address by default). However, these options may fall foul of Let's Encrypt's per-domain rate limit of [50 certificates per week](https://letsencrypt.org/docs/rate-limits/). Note that ephemeral AWS domain names like `ec2-34-267-212-76.compute-1.amazonaws.com` [are not accepted by Let's Encrypt](https://community.letsencrypt.org/t/policy-forbids-issuing-for-name-on-amazon-ec2-domain/12692)._
 
-2. Start with a clean Ubuntu 20.04 or 18.04 Server installation. The cheapest VPSs offered by Linode, OVH, vps.ag, Google, Hetzner and Vultr, and Scaleway's ARM64-2GB, have all been tested working. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr, port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
+2. Start with a clean Ubuntu Server installation. The cheapest VPSs offered by Linode, OVH, vps.ag, Google, Hetzner and Vultr, and Scaleway's ARM64-2GB, have all been tested working. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr, port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
 
 3. Optionally, set up [key-based SSH authentication](https://help.ubuntu.com/community/SSH/OpenSSH/Keys) (alternatively, this may have been handled automatically by your server provider, or you may choose to stick with password-based authentication). This may require you to run some or all of the following commands, with appropriate substitutions, on the machine you're going to be logging in from:
 
@@ -120,7 +121,7 @@ If you ran this script before 13 September 2021, and used the generated PowerShe
 
 Otherwise, if things don't work out right away ...
 
-* On the client: make sure you created the connection using the newly emailed `.mobileconfig` file or PowerShell commands. Setting it up manually via the OS GUI will _not_ work, since it will default to insecure ciphers which the server has not been configured to support. Also note that `.mobileconfig` files generated with earlier iterations of this script may no longer be compatible, since the configured ciphers have changed from time to time.
+* On the client: make sure you created the connection using the newly emailed `.mobileconfig` file, AppleScript or PowerShell commands. Setting it up manually via the OS GUI will _not_ work, since it will default to insecure ciphers which the server has not been configured to support. Also note that `.mobileconfig` files generated with earlier iterations of this script may no longer be compatible, since the configured ciphers have changed from time to time.
 
 * On the server: check that network ingress for UDP on ports 500 and 4500 is enabled (on some cloud platforms you'll have to add appropriate firewall rules to your virtual network). Also check that packet forwarding is enabled (on some cloud platforms this is controlled by a configuration setting that's off by default).
 
@@ -150,7 +151,7 @@ To exit nano it's `Ctrl + O` then `Ctrl + X`, and to have strongSwan pick up the
 
 ### Upgrades
 
-If you're on a pre-18.04 version of Ubuntu, it's probably easiest to make a record of any changes to `ipsec.secrets`, blow the whole thing away and reinstall, then reinstate `ipsec.secrets`.
+If you're on an older version of Ubuntu, it's probably easiest to make a record of any changes to `ipsec.secrets`, blow the whole thing away and reinstall, then reinstate `ipsec.secrets`.
 
 Note that you may also need to delete and recreate all your client connection settings using the updated PowerShell commands or .mobileconfig file, since there have been a few cipher changes over time. 
 
