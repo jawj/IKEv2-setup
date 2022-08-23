@@ -23,7 +23,7 @@ A Bash script that takes Ubuntu Server 22.04, 20.04 or 18.04 LTS from clean inst
 
 * The VPN server identifies itself with a _Let's Encrypt_ certificate, so there's no need for clients to install private certificates — they can simply authenticate with username and strong password (EAP-MSCHAPv2).
 
-* The only cipher set implemented is [CNSA/RFC 6379 Suite B](https://wiki.strongswan.org/projects/strongswan/wiki/IKEv2CipherSuites#Commercial-National-Security-Algorithm-CNSA-Suite-Suite-B-Cryptographic-Suites-for-IPsec-RFC-6379) with confidentiality/encryption.
+* The only cipher set implemented is the US [Commercial National Security Algorithm Suite (CNSA)](https://docs.strongswan.org/docs/5.9/config/IKEv2CipherSuites.html#_commercial_national_security_algorithm_suite).
 
 * The box is firewalled with `iptables` and configured for unattended security upgrades, and the _Let's Encrypt_ certificate is set up to auto-renew, so it _could_ be safe to forget about it all until your chosen Ubuntu version reaches end-of-life. (Note that `iptables` setup includes [basic rate-limiting](https://debian-administration.org/article/187/Using_iptables_to_rate-limit_incoming_connections), dropping new connections if there have been 60+ connection attempts in the last 5 minutes).
 
