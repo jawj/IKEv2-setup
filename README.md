@@ -31,17 +31,17 @@ A Bash script that takes Ubuntu Server 22.04, 20.04 or 18.04 LTS from clean inst
 
 The VPN is tested working with:
 
-*  **macOS 10.12 – 12.5, iOS 10 – 15.6**  — Built-in clients. A `.mobileconfig` profile is generated for Mac and iOS, to set up secure ciphers and enable *Connect on demand* support.
+*  **macOS 10.12 – 12.5, iOS 10 – 15.6**  — Built-in clients. A `.mobileconfig` profile is generated for iOS, to set up secure ciphers and enable *Connect on demand* support. An AppleScript script is generated for Mac, to prompt for VPN credentials and then do the same.
 * **Windows 10 Pro** — Built-in client. PowerShell commands are generated to configure the VPN and secure ciphers.
 * **Ubuntu (17.04 and presumably others)** — Using strongSwan. A Bash script is generated to set this up.
-* **Android** — Using the official strongSwan app.
+* **Android** — Using the official strongSwan app. A `.sswan` file is generated for configuration.
 
 Configuration files, scripts and instructions are sent by email. They are also dropped in the newly-created non-root user's home directory on the server (this point may be important, because VPS providers sometimes block traffic on port 25 by default and, even if successfully sent, conscientious email hosts will sometimes mark the email as spam).
 
 ### Caveats
 
 * There's no IPv6 support — and, in fact, IPv6 networking is disabled — because supporting IPv6 prevents the use of `forceencaps`, and honestly also because I haven't got to grips with the security implications (`ip6tables` rules and so on).
-* The script **won't** work as-is on 16.04 LTS because the `certbot` package is outdated, found under the name `letsencrypt`, and doesn't renew certificates automatically.
+* The script **won't** work as-is on 16.04 LTS or earlier (where the `certbot` package is outdated, found under the name `letsencrypt`, and doesn't renew certificates automatically).
 * **Don't use this unmodified on a server you use for anything else**: it does as it sees fit with various wider settings that may conflict with what you're doing.
 
 
@@ -51,7 +51,7 @@ Configuration files, scripts and instructions are sent by email. They are also d
 
   _Don't want to use your own domain name here? You could try using the reverse DNS name provided by your server host, or an automatic IP/DNS alias service such as [sslip.io](https://sslip.io/), [xip.io](http://xip.io), [nip.io](https://nip.io), [s.test.cab](https://s.test.cab), or [xip.lhjmmc.cn](https://xip.lhjmmc.cn/) (earlier versions of this script used an [sslip.io](https://sslip.io/) address by default). However, these options may fall foul of Let's Encrypt's per-domain rate limit of [50 certificates per week](https://letsencrypt.org/docs/rate-limits/). Note that ephemeral AWS domain names like `ec2-34-267-212-76.compute-1.amazonaws.com` [are not accepted by Let's Encrypt](https://community.letsencrypt.org/t/policy-forbids-issuing-for-name-on-amazon-ec2-domain/12692)._
 
-2. Start with a clean Ubuntu Server installation. The cheapest VPSs offered by Linode, OVH, vps.ag, Google, Hetzner and Vultr, and Scaleway's ARM64-2GB, have all been tested working. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr, port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
+2. Start with a clean Ubuntu Server installation. The cheapest VPSs offered by Linode, OVH, vps.ag, Google, AWS Lightsail, Hetzner and Vultr, and Scaleway's ARM64-2GB, have all been tested working. On Scaleway, unblock SMTP ports in the admin panel and *hard* reboot the server first, or your configuration email will not be delivered. On Vultr, port 25 may also be blocked, but you won't know, and the only way to fix it is to open a support ticket.
 
 3. Optionally, set up [key-based SSH authentication](https://help.ubuntu.com/community/SSH/OpenSSH/Keys) (alternatively, this may have been handled automatically by your server provider, or you may choose to stick with password-based authentication). This may require you to run some or all of the following commands, with appropriate substitutions, on the machine you're going to be logging in from:
 
