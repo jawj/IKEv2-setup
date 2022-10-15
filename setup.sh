@@ -321,7 +321,7 @@ sed -r \
 grep -Fq 'jawj/IKEv2-setup' /etc/ssh/sshd_config || echo "
 # https://github.com/jawj/IKEv2-setup
 MaxStartups 1
-MaxAuthTries 2
+MaxAuthTries 3
 UseDNS no" >> /etc/ssh/sshd_config
 
 if [[ $CERTLOGIN = "y" ]]; then
