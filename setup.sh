@@ -278,7 +278,8 @@ conn roadwarrior
   forceencaps=yes
 
   # https://docs.strongswan.org/docs/5.9/config/IKEv2CipherSuites.html#_commercial_national_security_algorithm_suite
-  ike=aes256gcm16-prfsha384-ecp384!
+  # ... but we also allow aes256gcm16-prfsha256-ecp256, because that's sometimes just what macOS proposes
+  ike=aes256gcm16-prfsha384-ecp384,aes256gcm16-prfsha256-ecp256!
   esp=aes256gcm16-ecp384!
 
   dpdaction=clear
@@ -770,4 +771,3 @@ echo "Connection instructions have been emailed to you, and can also be found in
 # necessary for IKEv2?
 # Windows: https://support.microsoft.com/en-us/kb/926179
 # HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PolicyAgent += AssumeUDPEncapsulationContextOnSendRule, DWORD = 2
-

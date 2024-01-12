@@ -23,7 +23,7 @@ A Bash script that takes Ubuntu Server 22.04, 20.04 or 18.04 LTS from clean inst
 
 * The VPN server identifies itself with a _Let's Encrypt_ certificate, so there's no need for clients to install private certificates — they can simply authenticate with username and strong password (EAP-MSCHAPv2).
 
-* The only cipher set implemented is the US [Commercial National Security Algorithm Suite (CNSA)](https://docs.strongswan.org/docs/5.9/config/IKEv2CipherSuites.html#_commercial_national_security_algorithm_suite).
+* The preferred cipher set is the US [Commercial National Security Algorithm Suite (CNSA)](https://docs.strongswan.org/docs/5.9/config/IKEv2CipherSuites.html#_commercial_national_security_algorithm_suite): `aes256gcm16-prfsha384-ecp384`. However, due to an apparent bug in recent versions of macOS, `aes256gcm16-prfsha256-ecp256` is also accepted.
 
 * The box is firewalled with `iptables` and configured for unattended security upgrades, and the _Let's Encrypt_ certificate is set up to auto-renew, so it _could_ be safe to forget about it all until your chosen Ubuntu version reaches end-of-life. (Note that `iptables` setup includes [basic rate-limiting](https://debian-administration.org/article/187/Using_iptables_to_rate-limit_incoming_connections), dropping new connections if there have been 60+ connection attempts in the last 5 minutes).
 
@@ -31,8 +31,8 @@ A Bash script that takes Ubuntu Server 22.04, 20.04 or 18.04 LTS from clean inst
 
 The VPN is tested working with:
 
-*  **macOS 10.12 – 12.5, iOS 10 – 15.6**  — Built-in clients. A `.mobileconfig` profile is generated for iOS, to set up secure ciphers and enable *Connect on demand* support. An AppleScript script is generated for Mac, to prompt for VPN credentials and then do the same.
-* **Windows 10 Pro** — Built-in client. PowerShell commands are generated to configure the VPN and secure ciphers.
+*  **macOS 10.12 – 14, iOS 10 – 17**  — Built-in clients. A `.mobileconfig` profile is generated for iOS, to set up secure ciphers and enable *Connect on demand* support. An AppleScript script is generated for Mac, to prompt for VPN credentials and then do the same.
+* **Windows 10 Pro, 11 Pro** — Built-in client. PowerShell commands are generated to configure the VPN and secure ciphers.
 * **Ubuntu (17.04 and presumably others)** — Using strongSwan. A Bash script is generated to set this up.
 * **Android** — Using the official strongSwan app. A `.sswan` file is generated for configuration.
 
