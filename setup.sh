@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # github.com/jawj/IKEv2-setup
-# Copyright (c) 2015 – 2022 George MacKerron
+# Copyright (c) 2015 – 2024 George MacKerron
 # Released under the MIT licence: http://opensource.org/licenses/mit-license
 
 echo
@@ -216,7 +216,12 @@ echo
 
 mkdir -p /etc/letsencrypt
 
-echo 'rsa-key-size = 4096
+# note: currently we stick to RSA because iOS/macOS may have trouble with ECDSA
+# (see https://github.com/jawj/IKEv2-setup/issues/159) 
+
+echo '
+key-type = rsa
+rsa-key-size = 4096
 pre-hook = /sbin/iptables -I INPUT -p tcp --dport 80 -j ACCEPT
 post-hook = /sbin/iptables -D INPUT -p tcp --dport 80 -j ACCEPT
 renew-hook = /usr/sbin/ipsec reload && /usr/sbin/ipsec secrets
