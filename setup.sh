@@ -219,15 +219,21 @@ mkdir -p /etc/letsencrypt
 # note: currently we stick to RSA because iOS/macOS may have trouble with ECDSA
 # (see https://github.com/jawj/IKEv2-setup/issues/159) 
 
-echo '
-key-type = rsa
+echo "
+standalone = true
+agree-tos = true
+non-interactive = true
+preferred-challenges = http
 rsa-key-size = 4096
+email = ${EMAILADDR}
 pre-hook = /sbin/iptables -I INPUT -p tcp --dport 80 -j ACCEPT
 post-hook = /sbin/iptables -D INPUT -p tcp --dport 80 -j ACCEPT
 renew-hook = /usr/sbin/ipsec reload && /usr/sbin/ipsec secrets
-' > /etc/letsencrypt/cli.ini
+" > /etc/letsencrypt/cli.ini
 
-certbot certonly --non-interactive --agree-tos --standalone --preferred-challenges http --email "${EMAILADDR}" -d "${VPNHOST}"
+# certbot on older Ubuntu doesn't recognise the --key-type switch, so try without if it errors with
+certbot certonly --key-type rsa -d "${VPNHOST}" || certbot certonly -d "${VPNHOST}"
+
 
 ln -f -s "/etc/letsencrypt/live/${VPNHOST}/cert.pem"    /etc/ipsec.d/certs/cert.pem
 ln -f -s "/etc/letsencrypt/live/${VPNHOST}/privkey.pem" /etc/ipsec.d/private/privkey.pem
