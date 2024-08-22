@@ -18,7 +18,8 @@ UBUNTUVERSION=$(lsb_release -rs)
 [[ "${UBUNTUVERSION}" == "18.04" ]] \
   || [[ "${UBUNTUVERSION}" == "20.04" ]] \
   || [[ "${UBUNTUVERSION}" == "22.04" ]] \
-  || exit_badly "This script is for Ubuntu 18.04/20.04/22.04 only: aborting (if you know what you're doing, try deleting this check)"
+  || [[ "${UBUNTUVERSION}" == "24.04" ]] \
+  || exit_badly "This script is for Ubuntu 18.04/20.04/22.04/24.04 only: aborting (if you know what you're doing, try deleting this check)"
 
 [[ $(id -u) -eq 0 ]] || exit_badly "Please run this script as root (e.g. sudo ./path/to/this/script)"
 
